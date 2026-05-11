@@ -2,12 +2,29 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .env
-mol_app/
-deepchem-api/
-playwright_tests/
-*.txt
-!requirements.txt
-!runtime.txt
 *.bat
 *.bak
 releases/
+
+# Flutter build artifacts (source is included, build output is not)
+mol_app/build/
+mol_app/.dart_tool/
+mol_app/.flutter-plugins
+mol_app/.flutter-plugins-dependencies
+
+# DeepChem intermediate checkpoints (keep only checkpoint5.pt via LFS)
+deepchem-api/saved_models/**/checkpoint[1-4].pt
+
+# Large data/cache
+deepchem-api/__pycache__/
+deepchem-api/*.egg-info/
+
+# Playwright test results
+playwright_tests/full/
+playwright_tests/*.png
+
+# Text files (except important ones)
+*.txt
+!requirements.txt
+!runtime.txt
+!sample_batch.csv

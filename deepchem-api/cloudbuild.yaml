@@ -1,0 +1,60 @@
+steps:
+  # Build Docker image (includes model training)
+  - name: "gcr.io/cloud-builders/docker"
+    id: build
+    args:
+      - build
+      - --tag
+      - "gcr.io/$PROJECT_ID/deepchem-api:$BUILD_ID"
+      - --tag
+      - "gcr.io/$PROJECT_ID/deepchem-api:latest"
+      - .
+    timeout: "1800s"  # model training can take ~20 min
+
+  # Push to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    id: push
+    args:
+      - push
+      - "--all-tags"
+      - "gcr.io/$PROJECT_ID/deepchem-api"
+    waitFor: [build]
+
+  # Deploy to Cloud Run (Tokyo region)
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - deepchem-api
+      - --image
+      - "gcr.io/$PROJECT_ID/deepchem-api:$BUILD_ID"
+      - --region
+      - asia-northeast1
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --memory
+      - 4Gi
+      - --cpu
+      - "2"
+      - --timeout
+      - "300"
+      - --concurrency
+      - "10"
+      - --min-instances
+      - "0"
+      - --max-instances
+      - "3"
+    waitFor: [push]
+
+images:
+  - "gcr.io/$PROJECT_ID/deepchem-api:$BUILD_ID"
+  - "gcr.io/$PROJECT_ID/deepchem-api:latest"
+
+options:
+  machineType: E2_HIGHCPU_8  # faster build for model training
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: "2400s"

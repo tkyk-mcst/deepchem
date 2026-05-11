@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepChem 分子特性予測デモ</title>
+  <style>
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+      --border: #2e3347; --accent: #6c8ef5; --accent2: #52c8a0;
+      --warn: #f5a623; --danger: #e05c5c; --text: #e8eaf0;
+      --muted: #8890a6; --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: "Inter","Hiragino Sans","Meiryo",system-ui,sans-serif; font-size: 18px; line-height: 1.6; min-height: 100vh; }
+
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header .subtitle { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; margin-left: auto; flex-shrink: 0; }
+    .status-dot.online  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .status-dot.offline { background: var(--danger); }
+
+    main { max-width: 1300px; margin: 0 auto; padding: 24px 32px; display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 16px; } }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .card-title { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 14px; }
+
+    .input-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: "Fira Code","Consolas",monospace; font-size: 13px; padding: 12px; resize: vertical; min-height: 80px; outline: none; transition: border-color .2s; }
+    textarea:focus { border-color: var(--accent); }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity .15s, transform .1s; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #fff; width: 100%; justify-content: center; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    .samples-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sample-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: var(--text); transition: background .15s, border-color .15s; }
+    .sample-pill:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .results-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    .molecule-img { display: flex; justify-content: center; align-items: center; background: #fff; border-radius: var(--radius); min-height: 140px; padding: 8px; }
+    .molecule-img svg { max-width: 100%; height: auto; }
+    .molecule-img .placeholder { color: #aaa; font-size: 13px; }
+
+    .desc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 600px) { .desc-grid { grid-template-columns: repeat(2,1fr); } }
+    .desc-item { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
+    .desc-label { font-size: 13px; color: var(--muted); line-height: 1.4; }
+    .desc-value { font-size: 23px; font-weight: 700; margin-top: 3px; }
+    .desc-unit  { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+    .ro5-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 12px; }
+    .ro5-item { border-radius: 8px; padding: 9px 12px; font-size: 16px; display: flex; align-items: flex-start; gap: 8px; }
+    .ro5-item.ok   { background: rgba(82,200,160,.12); border: 1px solid rgba(82,200,160,.3); }
+    .ro5-item.fail { background: rgba(224,92,92,.12);  border: 1px solid rgba(224,92,92,.3); }
+    .ro5-check { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .ro5-text  { line-height: 1.5; }
+    .ro5-name  { font-weight: 600; }
+    .ro5-cond  { font-size: 14px; color: var(--muted); }
+
+    .verdict { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 17px; }
+    .verdict.pass { background: rgba(82,200,160,.15); color: var(--accent2); }
+    .verdict.fail { background: rgba(224,92,92,.15);  color: var(--danger); }
+
+    .score-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .score-label { font-size: 16px; color: var(--muted); min-width: 120px; }
+    .bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 8px; }
+    .bar-fill  { height: 100%; border-radius: 4px; transition: width .4s ease; }
+    .score-val { font-size: 20px; font-weight: 700; min-width: 40px; text-align: right; }
+    .score-note { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    .pred-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .pred-row:last-child { border-bottom: none; }
+    .pred-info { flex: 1; min-width: 0; }
+    .pred-name  { font-size: 15px; color: var(--muted); margin-bottom: 2px; }
+    .pred-value { font-size: 22px; font-weight: 700; }
+    .pred-unc   { font-size: 14px; color: var(--muted); margin-top: 1px; }
+    .pred-bar   { width: 80px; flex-shrink: 0; }
+
+    .badge { padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    .badge-green  { background: rgba(82,200,160,.15);  color: var(--accent2); }
+    .badge-blue   { background: rgba(108,142,245,.15); color: var(--accent); }
+    .badge-warn   { background: rgba(245,166,35,.15);  color: var(--warn); }
+    .badge-red    { background: rgba(224,92,92,.15);   color: var(--danger); }
+
+    .tox-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+    @media (min-width: 900px) { .tox-grid { grid-template-columns: repeat(3,1fr); } }
+    .tox-item { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
+    .tox-item.toxic    { border-left: 3px solid var(--danger); }
+    .tox-item.nontoxic { border-left: 3px solid var(--accent2); }
+    .tox-en   { font-size: 13px; color: var(--muted); margin-bottom: 2px; font-family: monospace; }
+    .tox-ja   { font-size: 14px; color: var(--text);  margin-bottom: 5px; line-height: 1.4; }
+    .tox-result { display: flex; align-items: center; justify-content: space-between; }
+    .tox-label { font-size: 16px; font-weight: 700; }
+    .tox-pct   { font-size: 14px; color: var(--muted); }
+
+    .error-msg { background: rgba(224,92,92,.12); border: 1px solid rgba(224,92,92,.3); border-radius: var(--radius); padding: 12px 16px; color: #e07070; font-size: 13px; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:22px">⚗️</span>
+  <div>
+    <h1>DeepChem 分子特性予測デモ</h1>
+    <div class="subtitle">水溶解度・毒性・血液脳関門・HIV阻害・臨床毒性・薬らしさ — SMILES 入力で即予測</div>
+  </div>
+  <div class="status-dot" id="statusDot" title="API接続状態"></div>
+</header>
+
+<main>
+  <!-- 左パネル：入力 -->
+  <div class="input-panel">
+    <div class="card">
+      <div class="card-title">SMILES 入力（分子構造式）</div>
+      <textarea id="smilesInput" placeholder="例: CC(=O)Oc1ccccc1C(=O)O　（アスピリン）" rows="3"></textarea>
+      <button class="btn btn-primary" id="predictBtn" onclick="runPredict()">
+        <span id="btnText">予測する</span>
+        <span class="spinner hidden" id="spinner"></span>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">サンプル分子</div>
+      <div class="samples-grid" id="samplesGrid">
+        <span style="color:var(--muted);font-size:12px">読み込み中…</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">使い方</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.9">
+        <p>• 上の入力欄に SMILES 文字列を入力し<br>　「予測する」を押す</p>
+        <p>• サンプルボタンをクリックすると<br>　分子が自動入力されます</p>
+        <p style="margin-top:8px;color:var(--border)">──────────────────</p>
+        <p>Ctrl + Enter でも予測できます</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右パネル：結果 -->
+  <div class="results-panel" id="resultsPanel">
+    <div class="card" style="text-align:center;padding:48px">
+      <div style="font-size:40px;margin-bottom:12px">🧬</div>
+      <div style="color:var(--muted)">SMILES を入力して「予測する」を押してください</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = "";
+
+// ── 翻訳テーブル ──────────────────────────────────────────────────────────
+
+const 溶解度ラベル = {
+  "Highly Soluble":     "高溶解性",
+  "Soluble":            "溶解性良好",
+  "Moderately Soluble": "中程度の溶解性",
+  "Poorly Soluble":     "低溶解性",
+};
+const BBBラベル = {
+  "Permeable":     "透過性あり",
+  "Not Permeable": "透過性なし",
+};
+const HIVラベル = {
+  "Active":   "阻害活性あり",
+  "Inactive": "不活性",
+};
+const 毒性ラベル = {
+  "Toxic":     "毒性あり",
+  "Non-toxic": "毒性なし",
+};
+const ClinToxタスク名 = {
+  "FDA_APPROVED": "FDA 承認薬スコア",
+  "CT_TOX":       "臨床試験毒性スコア",
+};
+const ClinToxラベル = {
+  "Positive": "陽性",
+  "Negative": "陰性",
+};
+const Tox21エンドポイント = {
+  "NR-AR":        { ja: "アンドロゲン受容体",               note: "核内受容体 (NR)" },
+  "NR-AR-LBD":    { ja: "アンドロゲン受容体（結合ドメイン）", note: "核内受容体 (NR)" },
+  "NR-AhR":       { ja: "アリール炭化水素受容体",            note: "核内受容体 (NR)" },
+  "NR-Aromatase": { ja: "アロマターゼ（エストロゲン合成酵素）",note: "核内受容体 (NR)" },
+  "NR-ER":        { ja: "エストロゲン受容体",                note: "核内受容体 (NR)" },
+  "NR-ER-LBD":    { ja: "エストロゲン受容体（結合ドメイン）", note: "核内受容体 (NR)" },
+  "NR-PPAR-gamma":{ ja: "PPARγ（脂質・糖代謝調節）",        note: "核内受容体 (NR)" },
+  "SR-ARE":       { ja: "抗酸化応答経路",                   note: "ストレス応答 (SR)" },
+  "SR-ATAD5":     { ja: "DNA 損傷応答",                    note: "ストレス応答 (SR)" },
+  "SR-HSE":       { ja: "熱ショックタンパク質応答",           note: "ストレス応答 (SR)" },
+  "SR-MMP":       { ja: "ミトコンドリア膜電位",              note: "ストレス応答 (SR)" },
+  "SR-p53":       { ja: "p53 シグナル経路（DNA損傷）",       note: "ストレス応答 (SR)" },
+};
+
+function t(map, key) { return map[key] || key; }
+
+// ── 初期化 ────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const r = await fetch(`${API}/health`);
+    document.getElementById("statusDot").classList.add(r.ok ? "online" : "offline");
+  } catch { document.getElementById("statusDot").classList.add("offline"); }
+
+  try {
+    const { molecules } = await (await fetch(`${API}/samples`)).json();
+    const grid = document.getElementById("samplesGrid");
+    grid.innerHTML = "";
+    for (const m of molecules) {
+      const b = document.createElement("button");
+      b.className = "sample-pill";
+      b.textContent = m.name;
+      b.title = m.description;
+      b.onclick = () => { document.getElementById("smilesInput").value = m.smiles; runPredict(); };
+      grid.appendChild(b);
+    }
+  } catch { document.getElementById("samplesGrid").innerHTML = '<span style="color:var(--danger);font-size:12px">読み込み失敗</span>'; }
+})();
+
+// ── 予測リクエスト ─────────────────────────────────────────────────────────
+async function runPredict() {
+  const smiles = document.getElementById("smilesInput").value.trim();
+  if (!smiles) return;
+  setLoading(true);
+  const panel = document.getElementById("resultsPanel");
+  panel.innerHTML = "";
+  try {
+    const r = await fetch(`${API}/predict`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ smiles })
+    });
+    if (!r.ok) {
+      const e = await r.json();
+      panel.innerHTML = `<div class="error-msg">⚠️ ${e.detail || "予測エラー"}</div>`;
+      return;
+    }
+    render(panel, smiles, await r.json());
+  } catch(e) {
+    panel.innerHTML = `<div class="error-msg">⚠️ 通信エラー: ${e.message}</div>`;
+  } finally { setLoading(false); }
+}
+
+// ── 描画 ──────────────────────────────────────────────────────────────────
+function render(panel, smiles, d) {
+  const { descriptors: desc, drug_likeness: dl, predictions: pred } = d;
+
+  // 1. 分子構造式
+  const imgCard = card("分子構造（2D 表示）");
+  const imgDiv = document.createElement("div");
+  imgDiv.className = "molecule-img";
+  imgDiv.innerHTML = '<span class="placeholder">構造式を読み込み中…</span>';
+  imgCard.appendChild(imgDiv);
+  panel.appendChild(imgCard);
+  fetch(`${API}/molecule/image?smiles=${enc(smiles)}&width=520&height=240`)
+    .then(r => r.text()).then(svg => imgDiv.innerHTML = svg)
+    .catch(() => imgDiv.innerHTML = '<span class="placeholder">構造式の取得に失敗しました</span>');
+
+  // 2. 分子記述子
+  const descCard = card("分子記述子（RDKit 計算値）");
+  descCard.innerHTML += `<div class="desc-grid">
+    ${di("分子量",           desc.molecular_weight, "g/mol")}
+    ${di("脂溶性（LogP）",   desc.logp)}
+    ${di("極性表面積（TPSA）",desc.tpsa, "Å²")}
+    ${di("水素結合供与体数",  desc.hbd)}
+    ${di("水素結合受容体数",  desc.hba)}
+    ${di("回転可能結合数",    desc.rotatable_bonds)}
+    ${di("芳香環数",          desc.aromatic_rings)}
+    ${di("重原子数",          desc.heavy_atoms)}
+  </div>`;
+  panel.appendChild(descCard);
+
+  // 3. 薬らしさ（Lipinski Ro5 + QED）
+  const dlCard = card("経口薬候補スクリーニング（Lipinski Ro5 + QED スコア）");
+  dlCard.innerHTML += `<div class="ro5-grid">
+    ${ro5("分子量", "≤ 500 g/mol", dl.mw_ok,   desc.molecular_weight + " g/mol")}
+    ${ro5("脂溶性 (LogP)", "≤ 5",  dl.logp_ok, desc.logp)}
+    ${ro5("水素結合供与体数", "≤ 5",dl.hbd_ok,  desc.hbd + " 個")}
+    ${ro5("水素結合受容体数", "≤ 10",dl.hba_ok, desc.hba + " 個")}
+  </div>
+  <span class="verdict ${dl.drug_like ? "pass":"fail"}">
+    ${dl.drug_like ? "✓ 経口薬候補" : "✗ 経口薬不適"} — 違反 ${dl.violations} / 4 項目
+  </span>`;
+
+  if (dl.qed != null) {
+    const pct   = Math.round(dl.qed * 100);
+    const color = dl.qed > 0.6 ? "var(--accent2)" : dl.qed > 0.3 ? "var(--warn)" : "var(--danger)";
+    const level = dl.qed > 0.6 ? "高い" : dl.qed > 0.3 ? "中程度" : "低い";
+    dlCard.innerHTML += `
+      <div class="score-row">
+        <span class="score-label">QED（薬らしさ定量スコア）</span>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="score-val" style="color:${color}">${dl.qed}</span>
+      </div>
+      <div class="score-note">0〜1 の範囲で高いほど薬らしい構造 → ${level}（${dl.qed}）</div>`;
+  }
+  panel.appendChild(dlCard);
+
+  // 4. DeepChem 予測（溶解度・BBB・HIV・ClinTox）
+  const pCard = card("DeepChem 予測（ニューラルネット）");
+  let rows = "";
+
+  const sol = pred.solubility || {};
+  if (sol.logS != null) {
+    const pct = Math.max(0, Math.min(100, (sol.logS + 7) / 7 * 100));
+    const bc  = sol.logS > -1 ? "badge-green" : sol.logS > -3 ? "badge-blue" : sol.logS > -5 ? "badge-warn" : "badge-red";
+    rows += predRow(
+      "水溶解度（Delaney データセット）",
+      `${sol.logS} log(mol/L)`,
+      "値が大きいほど水に溶けやすい",
+      t(溶解度ラベル, sol.label), bc, pct, "var(--accent)"
+    );
+  }
+
+  const bbbp = pred.bbbp || {};
+  if (bbbp.probability != null) {
+    const pct = Math.round(bbbp.probability * 100);
+    const bc  = bbbp.probability >= 0.5 ? "badge-green" : "badge-red";
+    rows += predRow(
+      "血液脳関門（BBB）透過性",
+      `${pct}%`,
+      "脳への薬の届きやすさ",
+      t(BBBラベル, bbbp.label), bc, pct, "var(--accent2)"
+    );
+  }
+
+  const hiv = pred.hiv || {};
+  if (hiv.probability != null) {
+    const pct = Math.round(hiv.probability * 100);
+    const bc  = hiv.probability >= 0.5 ? "badge-red" : "badge-green";
+    rows += predRow(
+      "HIV 逆転写酵素阻害活性",
+      `${pct}%`,
+      "HIV ウイルスへの阻害効果",
+      t(HIVラベル, hiv.label), bc, pct, "var(--danger)"
+    );
+  }
+
+  const ct = pred.clintox || {};
+  for (const [k, v] of Object.entries(ct)) {
+    const pct  = Math.round(v.probability * 100);
+    const isFDA = k === "FDA_APPROVED";
+    const bc    = isFDA
+      ? (v.probability >= 0.5 ? "badge-green" : "badge-red")
+      : (v.probability >= 0.5 ? "badge-red"   : "badge-green");
+    rows += predRow(
+      t(ClinToxタスク名, k),
+      `${pct}%`,
+      isFDA ? "承認済み薬との構造的類似性" : "臨床試験での毒性リスク",
+      t(ClinToxラベル, v.label), bc, pct, "var(--warn)"
+    );
+  }
+
+  pCard.innerHTML += rows || '<div style="color:var(--muted);font-size:13px">予測モデル未ロード</div>';
+  panel.appendChild(pCard);
+
+  // 5. Tox21 毒性予測（12 エンドポイント）
+  const tox = pred.tox21 || {};
+  if (Object.keys(tox).length) {
+    const tCard = card("Tox21 毒性予測（12 種の生体内標的への毒性）");
+    tCard.innerHTML += `<div class="tox-grid">` +
+      Object.entries(tox).map(([k, v]) => {
+        const info  = Tox21エンドポイント[k] || { ja: k, note: "" };
+        const toxic = v.probability >= 0.5;
+        const col   = toxic ? "var(--danger)" : "var(--accent2)";
+        return `<div class="tox-item ${toxic ? "toxic" : "nontoxic"}">
+          <div class="tox-en">${k}</div>
+          <div class="tox-ja">${info.ja}</div>
+          <div class="tox-result">
+            <span class="tox-label" style="color:${col}">${t(毒性ラベル, v.label)}</span>
+            <span class="tox-pct">${(v.probability*100).toFixed(0)}%</span>
+          </div>
+        </div>`;
+      }).join("") + `</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px">
+        NR = 核内受容体（ホルモン関連） / SR = 細胞ストレス応答経路
+      </div>`;
+    panel.appendChild(tCard);
+  }
+}
+
+// ── ヘルパー関数 ──────────────────────────────────────────────────────────
+function card(title) {
+  const c = document.createElement("div");
+  c.className = "card";
+  c.innerHTML = `<div class="card-title">${title}</div>`;
+  return c;
+}
+function enc(s) { return encodeURIComponent(s); }
+
+function di(label, value, unit="") {
+  return `<div class="desc-item">
+    <div class="desc-label">${label}</div>
+    <div class="desc-value">${value}<span class="desc-unit">${unit ? " "+unit : ""}</span></div>
+  </div>`;
+}
+
+function ro5(name, cond, ok, value) {
+  return `<div class="ro5-item ${ok?"ok":"fail"}">
+    <span class="ro5-check">${ok ? "✓" : "✗"}</span>
+    <span class="ro5-text">
+      <span class="ro5-name">${name}</span><br>
+      <span class="ro5-cond">条件: ${cond}　実測値: ${value}</span>
+    </span>
+  </div>`;
+}
+
+function predRow(name, value, note, badge, badgeClass, pct, barColor) {
+  return `<div class="pred-row">
+    <div class="pred-info">
+      <div class="pred-name">${name}</div>
+      <div class="pred-value">${value}</div>
+      <div class="pred-unc">${note}</div>
+    </div>
+    <div class="pred-bar">
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+    </div>
+    <span class="badge ${badgeClass}">${badge}</span>
+  </div>`;
+}
+
+function setLoading(on) {
+  document.getElementById("predictBtn").disabled = on;
+  document.getElementById("btnText").textContent = on ? "計算中…" : "予測する";
+  document.getElementById("spinner").classList.toggle("hidden", !on);
+}
+
+document.getElementById("smilesInput")?.addEventListener("keydown", e => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runPredict();
+});
+</script>
+</body>
+</html>

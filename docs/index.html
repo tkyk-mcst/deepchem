@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoleculeAI — DeepChem Explorer ドキュメント</title>
+  <style>
+    :root {
+      --bg:       #f4f0fa;
+      --surface:  #ede8f7;
+      --card:     #ffffff;
+      --border:   #d8cff0;
+      --teal:     #6c3fc5;
+      --teal-dim: #9270d9;
+      --blue:     #4a6cf7;
+      --purple:   #8b5cf6;
+      --orange:   #d97706;
+      --red:      #dc2626;
+      --text:     #1e1a2e;
+      --muted:    #6b618f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #e8e0f8 0%, #d6c9f5 40%, #e4daf7 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 40px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 60% 40%, rgba(108,63,197,.08) 0%, transparent 70%);
+    }
+    .hero-icon { font-size: 64px; margin-bottom: 16px; display: block; }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #6c3fc5, #4a6cf7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin-top: 12px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .badge-row {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap; margin-top: 28px;
+    }
+    .badge {
+      background: rgba(108,63,197,.1);
+      border: 1px solid rgba(108,63,197,.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .82rem;
+      color: var(--teal);
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    .section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    .section:last-child { border-bottom: none; }
+    .section-label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .section-desc { color: var(--muted); margin-bottom: 36px; font-size: .97rem; }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(108,63,197,.06);
+    }
+    .card:hover { border-color: var(--teal-dim); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,63,197,.12); }
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .card p { font-size: .88rem; color: var(--muted); }
+    .card .tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: .72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(74,108,247,.1);
+      color: var(--blue);
+      border: 1px solid rgba(74,108,247,.25);
+    }
+
+    /* ── Flow steps ── */
+    .flow {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 180px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(108,63,197,.06);
+    }
+    .flow-step + .flow-step { margin-left: 12px; }
+    .flow-step .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      color: #0d1117;
+      font-weight: 700;
+      font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px;
+    }
+    .flow-step h4 { font-size: .9rem; margin-bottom: 6px; }
+    .flow-step p { font-size: .8rem; color: var(--muted); }
+    .arrow {
+      display: flex; align-items: center;
+      color: var(--teal-dim);
+      font-size: 1.4rem;
+      padding: 0 4px;
+    }
+
+    /* ── Properties table ── */
+    .prop-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+    .prop-table th {
+      background: var(--surface);
+      padding: 10px 16px;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .prop-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #e5ddf5;
+    }
+    .prop-table tr:last-child td { border-bottom: none; }
+    .prop-table tr:hover td { background: rgba(108,63,197,.04); }
+    .badge-green {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(22,163,74,.1);
+      color: #16a34a;
+      font-size: .75rem;
+      border: 1px solid rgba(22,163,74,.2);
+    }
+    .badge-blue {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(74,108,247,.1);
+      color: var(--blue);
+      font-size: .75rem;
+      border: 1px solid rgba(74,108,247,.2);
+    }
+    .badge-purple {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(139,92,246,.1);
+      color: var(--purple);
+      font-size: .75rem;
+      border: 1px solid rgba(139,92,246,.2);
+    }
+
+    /* ── Code block ── */
+    pre {
+      background: #f0ebfc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: .83rem;
+      line-height: 1.6;
+      color: #2d1b69;
+    }
+    .kw { color: #b91c1c; }
+    .str { color: #1d4ed8; }
+    .comment { color: #9ca3af; }
+    .fn { color: #7c3aed; }
+    .num { color: #0369a1; }
+
+    /* ── Architecture diagram ── */
+    .arch {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr 60px 1fr;
+      gap: 0;
+      align-items: center;
+    }
+    .arch-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(108,63,197,.06);
+    }
+    .arch-box .arch-icon { font-size: 36px; margin-bottom: 8px; }
+    .arch-box h4 { font-size: .95rem; margin-bottom: 4px; }
+    .arch-box p { font-size: .78rem; color: var(--muted); }
+    .arch-arrow {
+      text-align: center;
+      font-size: 1.8rem;
+      color: var(--teal-dim);
+    }
+
+    /* ── Sample molecules ── */
+    .mol-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .mol-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: .85rem;
+      box-shadow: 0 1px 4px rgba(108,63,197,.06);
+    }
+    .mol-chip .mol-name { font-weight: 600; margin-bottom: 3px; }
+    .mol-chip .mol-desc { font-size: .75rem; color: var(--muted); }
+
+    /* ── Screenshot mockup ── */
+    .screen-mockup {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 20px;
+      box-shadow: 0 4px 24px rgba(108,63,197,.1);
+    }
+    .screen-bar {
+      background: var(--surface);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+    .url-bar {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .screen-content { padding: 24px; }
+
+    /* ── Endpoint list ── */
+    .endpoint {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e5ddf5;
+    }
+    .endpoint:last-child { border-bottom: none; }
+    .method {
+      flex-shrink: 0;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .get { background: rgba(22,163,74,.12); color: #15803d; border: 1px solid rgba(22,163,74,.2); }
+    .post { background: rgba(74,108,247,.12); color: #3b5bdb; border: 1px solid rgba(74,108,247,.2); }
+    .endpoint-path { font-family: monospace; font-size: .87rem; color: var(--teal); }
+    .endpoint-desc { font-size: .83rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Warning box ── */
+    .info-box {
+      background: rgba(108,63,197,.06);
+      border: 1px solid rgba(108,63,197,.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: .9rem;
+      margin-top: 16px;
+    }
+    .info-box strong { color: var(--teal); }
+
+    /* ── Footer ── */
+    footer {
+      background: linear-gradient(135deg, #e8e0f8 0%, #d6c9f5 100%);
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    /* ── Nav ── */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(244,240,250,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex; align-items: center; gap: 32px;
+      box-shadow: 0 1px 8px rgba(108,63,197,.08);
+    }
+    .nav-logo { font-weight: 700; color: var(--teal); padding: 14px 0; font-size: 1rem; }
+    .nav-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .88rem;
+      padding: 14px 0;
+      transition: color .2s;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    @media (max-width: 700px) {
+      .hero h1 { font-size: 2rem; }
+      .arch { grid-template-columns: 1fr; }
+      .arch-arrow { transform: rotate(90deg); }
+      .flow { flex-direction: column; }
+      .flow-step + .flow-step { margin-left: 0; margin-top: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="top-nav">
+  <span class="nav-logo">🔬 MoleculeAI</span>
+  <a class="nav-link" href="#features">機能</a>
+  <a class="nav-link" href="#screens">画面</a>
+  <a class="nav-link" href="#properties">予測項目</a>
+  <a class="nav-link" href="#api">API</a>
+  <a class="nav-link" href="#tech">技術構成</a>
+  <a class="nav-link" href="#start">起動方法</a>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <span class="hero-icon">🧪</span>
+  <h1>MoleculeAI — DeepChem Explorer</h1>
+  <p class="subtitle">
+    化学式（SMILES）を入力するだけで、分子の薬物動態・毒性・物性を
+    AI が瞬時に予測するウェブアプリケーション
+  </p>
+  <div class="badge-row">
+    <span class="badge">Flutter Web</span>
+    <span class="badge">FastAPI</span>
+    <span class="badge">DeepChem / RDKit</span>
+    <span class="badge">ADMET 予測</span>
+    <span class="badge">PubChem 連携</span>
+    <span class="badge">日本語対応</span>
+  </div>
+</div>
+
+<!-- ── What is this ── -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">概要</div>
+    <h2 class="section-title">このアプリでできること</h2>
+    <p class="section-desc">
+      新薬開発や化学研究において最も重要な指標「ADMET」（吸収・分布・代謝・排泄・毒性）を、
+      化合物の構造式（SMILES）から即座に計算・可視化するツールです。
+    </p>
+
+    <div class="arch">
+      <div class="arch-box">
+        <div class="arch-icon">👤</div>
+        <h4>ユーザー</h4>
+        <p>SMILES / 化合物名を入力</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">📱</div>
+        <h4>Flutter Web UI</h4>
+        <p>ブラウザ上で動作するリッチなインターフェース</p>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="arch-icon">🤖</div>
+        <h4>FastAPI + DeepChem</h4>
+        <p>機械学習モデルによる予測・RDKit による分子計算</p>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top: 24px;">
+      <strong>💡 ポイント：</strong>
+      専門的な化学知識がなくても、化合物名で PubChem を検索→SMILESを自動取得→予測まで
+      ワンクリックで完結します。
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ── -->
+<div class="section" id="features">
+  <div class="container">
+    <div class="section-label">機能一覧</div>
+    <h2 class="section-title">5 つの主要機能</h2>
+    <p class="section-desc">左サイドバーのアイコンから各機能に即座にアクセスできます。</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <span class="card-icon">🔬</span>
+        <h3>単一分子予測（Predict）</h3>
+        <p>
+          SMILES を入力して「Predict」ボタンを押すだけ。
+          分子の 2D 構造画像、ADMET レーダーチャート、
+          Lipinski の法則判定、50+ 以上の物性値を一括表示。
+        </p>
+        <span class="tag">メイン機能</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">📊</span>
+        <h3>バッチ予測（Batch）</h3>
+        <p>
+          複数の化合物を一度に予測。SMILES を改行区切りで
+          貼り付けるか CSV をアップロード。
+          結果はサムネイル付き表形式で表示・並び替え可能。
+        </p>
+        <span class="tag">最大 100 分子</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">⚖️</span>
+        <h3>分子比較（Compare）</h3>
+        <p>
+          2 つの分子を並べて比較。
+          Tanimoto 類似度スコア（ECFP4 フィンガープリント）、
+          各物性値の差分テーブル、
+          両方の ADMET レーダーチャートを同時表示。
+        </p>
+        <span class="tag">Tanimoto 類似度</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🔍</span>
+        <h3>PubChem 検索（Search）</h3>
+        <p>
+          化合物の一般名（例：aspirin、caffeine）で検索すると
+          SMILES・分子式・分子量を PubChem から自動取得。
+          「Predict Properties」で即座に予測へ。
+        </p>
+        <span class="tag">PubChem 連携</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🏠</span>
+        <h3>サンプル分子（Home）</h3>
+        <p>
+          アスピリン・カフェイン・ペニシリン・ドーパミンなど
+          12 種の代表的分子がワンクリックで予測できる
+          ショートカット付きホーム画面。
+        </p>
+        <span class="tag">12 種のサンプル</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">⚠️</span>
+        <h3>構造アラート（Alerts）</h3>
+        <p>
+          PAINS フィルター・Brenk フィルターによる
+          薬物候補として問題のある構造モチーフを自動検出。
+          創薬スクリーニングの最初のふるいかけに。
+        </p>
+        <span class="tag">PAINS / Brenk</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Screen walkthrough ── -->
+<div class="section" id="screens">
+  <div class="container">
+    <div class="section-label">使い方</div>
+    <h2 class="section-title">画面の流れ</h2>
+    <p class="section-desc">典型的な利用シナリオ：単一分子の予測</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <h4>SMILES 入力</h4>
+        <p>テキストボックスに化学式を入力（例：<code style="color:var(--teal);font-size:.75rem">CC(=O)Oc1ccccc1C(=O)O</code>）</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <h4>Predict 実行</h4>
+        <p>ボタンを押すかEnterキーで予測開始。1〜3 秒で結果が返る</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <h4>2D 構造確認</h4>
+        <p>SVG 形式の分子構造図を表示。RDKit が描画</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <h4>ADMET レーダー</h4>
+        <p>6 軸レーダーチャートで薬物動態プロファイルを一目確認</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <h4>詳細数値</h4>
+        <p>Lipinski・分子記述子・ML予測・アナログ候補を確認</p>
+      </div>
+    </div>
+
+    <!-- Mockup -->
+    <div class="screen-mockup">
+      <div class="screen-bar">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <span class="url-bar">http://localhost:3000</span>
+      </div>
+      <div class="screen-content">
+        <div style="display:grid;grid-template-columns:80px 1fr;gap:20px;align-items:start;">
+          <!-- Nav rail -->
+          <div style="background:#e8e0f8;border:1px solid var(--border);border-radius:8px;padding:12px 8px;display:flex;flex-direction:column;gap:16px;align-items:center;">
+            <div style="font-size:20px;">🏠</div>
+            <div style="font-size:20px;background:rgba(108,63,197,.15);border-radius:8px;padding:6px 10px;">🔬</div>
+            <div style="font-size:20px;">📊</div>
+            <div style="font-size:20px;">⚖️</div>
+            <div style="font-size:20px;">🔍</div>
+          </div>
+          <!-- Main content -->
+          <div>
+            <h3 style="font-size:1.3rem;margin-bottom:4px;">Single Molecule Prediction</h3>
+            <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px;">SMILES 文字列を入力して全 ADMET プロファイルを取得</p>
+
+            <!-- Input row -->
+            <div style="display:flex;gap:10px;margin-bottom:20px;">
+              <div style="flex:1;background:#f0ebfc;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;color:#4c1d95;font-family:monospace;">
+                CC(=O)Oc1ccccc1C(=O)O
+              </div>
+              <div style="background:linear-gradient(90deg,#6c3fc5,#4a6cf7);color:#fff;border-radius:8px;padding:10px 16px;font-weight:700;font-size:.85rem;">▶ Predict</div>
+            </div>
+
+            <!-- Result row -->
+            <div style="display:grid;grid-template-columns:180px 1fr;gap:16px;">
+              <!-- Molecule image placeholder -->
+              <div style="background:#f0ebfc;border:1px solid var(--border);border-radius:8px;height:140px;display:flex;align-items:center;justify-content:center;font-size:40px;">⬡</div>
+              <!-- Radar placeholder -->
+              <div style="background:#f0ebfc;border:1px solid var(--border);border-radius:8px;padding:14px;">
+                <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px;font-weight:600;">ADMET Profile</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+                  <div style="font-size:.72rem;"><span style="color:#6c3fc5;">●</span> Solubility <span style="color:var(--text);">65%</span></div>
+                  <div style="font-size:.72rem;"><span style="color:#4a6cf7;">●</span> BBBP <span style="color:var(--text);">42%</span></div>
+                  <div style="font-size:.72rem;"><span style="color:#8b5cf6;">●</span> hERG <span style="color:var(--text);">28%</span></div>
+                  <div style="font-size:.72rem;"><span style="color:#d97706;">●</span> Tox21 <span style="color:var(--text);">18%</span></div>
+                  <div style="font-size:.72rem;"><span style="color:#dc2626;">●</span> ClinTox <span style="color:var(--text);">8%</span></div>
+                  <div style="font-size:.72rem;"><span style="color:#0369a1;">●</span> HIV <span style="color:var(--text);">5%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Predicted properties ── -->
+<div class="section" id="properties">
+  <div class="container">
+    <div class="section-label">予測項目</div>
+    <h2 class="section-title">計算・予測される物性一覧</h2>
+    <p class="section-desc">RDKit による理論計算値と、DeepChem 機械学習モデルによる予測値の両方を提供します。</p>
+
+    <table class="prop-table">
+      <tr>
+        <th>カテゴリ</th>
+        <th>項目名</th>
+        <th>説明</th>
+        <th>手法</th>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>分子量（MW）</td>
+        <td>分子の総質量 [g/mol]。Lipinski則では ≤500</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>LogP</td>
+        <td>水/オクタノール分配係数。脂溶性の指標。≤5 が薬物適性の目安</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>TPSA</td>
+        <td>位相極性表面積 [Å²]。膜透過性・腸管吸収の指標。≤140 が目安</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>HBD / HBA</td>
+        <td>水素結合供与体 / 受容体数。Lipinski則では HBD≤5、HBA≤10</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>回転可能結合数</td>
+        <td>分子の柔軟性。≤10 が経口吸収の目安</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>環の数 / 芳香環数</td>
+        <td>環構造の複雑さ。平面性・代謝安定性に影響</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>Fsp3</td>
+        <td>sp3 炭素の割合。立体的複雑さの指標（>0.42 が理想的）</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>物性</td>
+        <td>分子式</td>
+        <td>元素組成（例：C₉H₈O₄）</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-A</td>
+        <td>水溶性（logS）</td>
+        <td>水への溶解度の対数。吸収・製剤設計に直結</td>
+        <td><span class="badge-blue">DeepChem / Delaney</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-D</td>
+        <td>血液脳関門透過性（BBBP）</td>
+        <td>中枢神経系への移行性。CNS 薬では重要な指標</td>
+        <td><span class="badge-blue">DeepChem / MoleculeNet</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-T</td>
+        <td>毒性（Tox21）</td>
+        <td>12 種の毒性エンドポイント（NR-AR, SR-MMP など）の複合スコア</td>
+        <td><span class="badge-blue">DeepChem / Tox21</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-T</td>
+        <td>臨床毒性（ClinTox）</td>
+        <td>臨床試験で毒性が確認された化合物との類似性</td>
+        <td><span class="badge-blue">DeepChem / ClinTox</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-T</td>
+        <td>hERG ブロック</td>
+        <td>心毒性リスク。hERG チャンネル阻害による QT 延長の予測</td>
+        <td><span class="badge-purple">RDKit 推定</span></td>
+      </tr>
+      <tr>
+        <td>ADMET-T</td>
+        <td>HIV 複製阻害</td>
+        <td>抗 HIV 活性の予測</td>
+        <td><span class="badge-blue">DeepChem / HIV</span></td>
+      </tr>
+      <tr>
+        <td>薬物適性</td>
+        <td>Lipinski の法則</td>
+        <td>経口薬物適性の古典的スクリーニング（「Rule of Five」)</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>薬物適性</td>
+        <td>Veber 規則</td>
+        <td>経口生物学的利用能（回転可能結合数・TPSA による補完的判定）</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>類似性</td>
+        <td>Tanimoto 類似度</td>
+        <td>ECFP4 フィンガープリントによる 2 分子間の構造類似度（0〜1）</td>
+        <td><span class="badge-green">RDKit 計算</span></td>
+      </tr>
+      <tr>
+        <td>候補生成</td>
+        <td>アナログ候補</td>
+        <td>入力分子の構造類似体を最大 6 件自動生成</td>
+        <td><span class="badge-green">RDKit 変換</span></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Sample molecules ── -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">サンプル分子</div>
+    <h2 class="section-title">あらかじめ登録されている 12 種の分子</h2>
+    <p class="section-desc">ホーム画面から即座に予測を試せます。</p>
+    <div class="mol-grid">
+      <div class="mol-chip">
+        <div class="mol-name">🤕 Aspirin</div>
+        <div class="mol-desc">アスピリン — 痛み止め・解熱剤</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">☕ Caffeine</div>
+        <div class="mol-desc">カフェイン — 覚醒作用</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">💊 Ibuprofen</div>
+        <div class="mol-desc">イブプロフェン — 抗炎症薬</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🌡 Paracetamol</div>
+        <div class="mol-desc">パラセタモール — 解熱鎮痛剤</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🦠 Penicillin G</div>
+        <div class="mol-desc">ペニシリン G — 抗生物質</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🧠 Dopamine</div>
+        <div class="mol-desc">ドーパミン — 神経伝達物質</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">😊 Serotonin</div>
+        <div class="mol-desc">セロトニン — 幸福ホルモン</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🍬 Glucose</div>
+        <div class="mol-desc">グルコース — 単純糖</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🫀 Cholesterol</div>
+        <div class="mol-desc">コレステロール — ステロイド</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">🍺 Ethanol</div>
+        <div class="mol-desc">エタノール — アルコール</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">💙 Sildenafil</div>
+        <div class="mol-desc">シルデナフィル — バイアグラ</div>
+      </div>
+      <div class="mol-chip">
+        <div class="mol-name">💉 Metformin</div>
+        <div class="mol-desc">メトホルミン — 糖尿病治療薬</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── API ── -->
+<div class="section" id="api">
+  <div class="container">
+    <div class="section-label">REST API</div>
+    <h2 class="section-title">バックエンド API エンドポイント</h2>
+    <p class="section-desc">
+      FastAPI 製の REST API。<code style="color:var(--teal)">http://localhost:8282/docs</code>
+      で Swagger UI が利用可能。
+    </p>
+
+    <div class="endpoint">
+      <span class="method post">POST</span>
+      <div>
+        <div class="endpoint-path">/predict</div>
+        <div class="endpoint-desc">単一 SMILES → 全物性予測（分子構造・ADMET・薬物適性・アラート）</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method post">POST</span>
+      <div>
+        <div class="endpoint-path">/predict/batch</div>
+        <div class="endpoint-desc">複数 SMILES リスト → バッチ予測（最大 100 分子）</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method post">POST</span>
+      <div>
+        <div class="endpoint-path">/molecule/compare</div>
+        <div class="endpoint-desc">2 分子の比較予測 + Tanimoto 類似度</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/molecule/image?smiles=&amp;width=&amp;height=</div>
+        <div class="endpoint-desc">SMILES → SVG 形式 2D 構造画像</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/molecule/variants?smiles=&amp;n=6</div>
+        <div class="endpoint-desc">構造アナログ候補の自動生成（最大 12 件）</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/molecule/alerts?smiles=</div>
+        <div class="endpoint-desc">PAINS / Brenk 構造アラートの確認</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/molecule/similarity?smiles1=&amp;smiles2=</div>
+        <div class="endpoint-desc">2 分子間の Tanimoto 類似度（ECFP4）</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/pubchem/search?name=</div>
+        <div class="endpoint-desc">化合物名 → PubChem 経由で SMILES・分子式・分子量を取得</div>
+      </div>
+    </div>
+    <div class="endpoint">
+      <span class="method get">GET</span>
+      <div>
+        <div class="endpoint-path">/samples</div>
+        <div class="endpoint-desc">プリセット 12 分子のリスト取得</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px;margin-bottom:12px;font-size:1rem;">API リクエスト例（Aspirin の予測）</h3>
+    <pre><span class="comment"># curl でテスト</span>
+curl -X POST http://localhost:8282/predict \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d '<span class="str">{"smiles": "CC(=O)Oc1ccccc1C(=O)O"}</span>'
+
+<span class="comment"># レスポンス例</span>
+{
+  <span class="str">"smiles"</span>: <span class="str">"CC(=O)Oc1ccccc1C(=O)O"</span>,
+  <span class="str">"molecular_weight"</span>: <span class="num">180.16</span>,
+  <span class="str">"logP"</span>: <span class="num">1.31</span>,
+  <span class="str">"tpsa"</span>: <span class="num">63.6</span>,
+  <span class="str">"hbd"</span>: <span class="num">1</span>, <span class="str">"hba"</span>: <span class="num">4</span>,
+  <span class="str">"drug_likeness"</span>: { <span class="str">"lipinski_pass"</span>: <span class="kw">true</span>, <span class="str">"score"</span>: <span class="num">4</span> },
+  <span class="str">"predictions"</span>: {
+    <span class="str">"solubility_logS"</span>: <span class="num">-2.14</span>,
+    <span class="str">"bbbp"</span>: <span class="num">0.42</span>,
+    <span class="str">"hiv_inhibition"</span>: <span class="num">0.05</span>
+  }
+}</pre>
+  </div>
+</div>
+
+<!-- ── Tech stack ── -->
+<div class="section" id="tech">
+  <div class="container">
+    <div class="section-label">技術構成</div>
+    <h2 class="section-title">使用技術スタック</h2>
+    <p class="section-desc">フロントエンドからバックエンドまで、モダンな技術を採用。</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <span class="card-icon">📱</span>
+        <h3>Flutter Web</h3>
+        <p>
+          Google 製の UI フレームワーク。CanvasKit レンダラーにより
+          デスクトップアプリ並みのリッチな UI をブラウザ上で実現。
+          チャート描画に <strong>fl_chart</strong> を使用。
+        </p>
+        <span class="tag">v3.41.6</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">⚡</span>
+        <h3>FastAPI</h3>
+        <p>
+          Python 製の高速 REST API フレームワーク。
+          非同期処理（asyncio）により PubChem などの外部 API 呼び出しも
+          ノンブロッキングで処理。<strong>/docs</strong> で Swagger UI 付き。
+        </p>
+        <span class="tag">Python 3.9+</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🧬</span>
+        <h3>DeepChem</h3>
+        <p>
+          分子機械学習ライブラリ。MoleculeNet ベンチマーク
+          データセット（Delaney・BBBP・Tox21・ClinTox・HIV）で
+          学習した MultitaskRegressor / Classifier を使用。
+        </p>
+        <span class="tag">MoleculeNet モデル</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">⚗️</span>
+        <h3>RDKit</h3>
+        <p>
+          化学情報処理の標準ライブラリ。SMILES の解析・
+          分子記述子計算・SVG 描画・ECFP4 フィンガープリント・
+          PAINS/Brenk フィルター・3D 座標生成を担当。
+        </p>
+        <span class="tag">オープンソース</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🌐</span>
+        <h3>PubChem API</h3>
+        <p>
+          NCBI が提供する世界最大の化合物データベース。
+          化合物名から SMILES・分子式・IUPACname・MW を
+          リアルタイムで取得。
+        </p>
+        <span class="tag">無料・外部 API</span>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🎭</span>
+        <h3>Playwright</h3>
+        <p>
+          E2E 自動テストフレームワーク。Flutter の CanvasKit 描画に対応し、
+          座標ベースのクリック操作でリグレッションテストを実施。
+          全画面のスクリーンショットを自動生成。
+        </p>
+        <span class="tag">Node.js v1.59.1</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Data / Model ── -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">学習データ</div>
+    <h2 class="section-title">機械学習モデルのデータソース</h2>
+    <p class="section-desc">DeepChem の MoleculeNet から公開データセットを使用して学習。</p>
+
+    <table class="prop-table">
+      <tr>
+        <th>モデル名</th>
+        <th>データセット</th>
+        <th>分子数</th>
+        <th>予測対象</th>
+      </tr>
+      <tr>
+        <td>Delaney ESOL</td>
+        <td>Delaney (2004)</td>
+        <td>1,128</td>
+        <td>水溶性 (logS)</td>
+      </tr>
+      <tr>
+        <td>BBBP</td>
+        <td>Martins et al. (2012)</td>
+        <td>2,050</td>
+        <td>血液脳関門透過性</td>
+      </tr>
+      <tr>
+        <td>Tox21</td>
+        <td>NIH Tox21 Challenge (2014)</td>
+        <td>8,014</td>
+        <td>12 種の毒性エンドポイント</td>
+      </tr>
+      <tr>
+        <td>ClinTox</td>
+        <td>Gayvert et al. (2016)</td>
+        <td>1,491</td>
+        <td>臨床試験での毒性失敗</td>
+      </tr>
+      <tr>
+        <td>HIV</td>
+        <td>DTP AIDS Antiviral Screen</td>
+        <td>41,913</td>
+        <td>HIV 複製阻害活性</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ── Start ── -->
+<div class="section" id="start">
+  <div class="container">
+    <div class="section-label">起動方法</div>
+    <h2 class="section-title">ローカル環境での起動</h2>
+    <p class="section-desc">2 つのサーバーを起動するだけで使えます。</p>
+
+    <h3 style="font-size:1rem;margin-bottom:8px;color:var(--teal);">方法 A：バッチファイルで一括起動（Windows）</h3>
+    <pre><span class="comment"># start_servers.bat をダブルクリック、または：</span>
+cd C:\Users\takay\python379\DeepChem
+start_servers.bat</pre>
+
+    <h3 style="font-size:1rem;margin:20px 0 8px;color:var(--teal);">方法 B：手動起動</h3>
+    <pre><span class="comment"># ① モックバックエンド（ポート 8282）</span>
+cd C:\Users\takay\python379\DeepChem
+python mock_backend.py
+
+<span class="comment"># ② Flutter Web アプリ（ポート 3000）</span>
+python -m http.server 3000 --directory mol_app/build/web
+
+<span class="comment"># ③ ブラウザでアクセス</span>
+http://localhost:3000        <span class="comment"># アプリ</span>
+http://localhost:8282/docs   <span class="comment"># API ドキュメント（Swagger）</span></pre>
+
+    <h3 style="font-size:1rem;margin:20px 0 8px;color:var(--teal);">自動テスト（Playwright）</h3>
+    <pre><span class="comment"># 全機能の E2E テスト（スクリーンショット 12 枚を生成）</span>
+cd C:\Users\takay\python379\DeepChem
+node playwright_tests/test_full.js</pre>
+
+    <div class="info-box">
+      <strong>📁 ファイル構成：</strong><br>
+      <code style="color:var(--muted);">DeepChem/</code><br>
+      <code style="color:var(--muted);">├── mol_app/          </code>← Flutter アプリソース<br>
+      <code style="color:var(--muted);">├── mock_backend.py   </code>← モック API サーバー（RDKit + モック ML）<br>
+      <code style="color:var(--muted);">├── deepchem-api/     </code>← 本番 DeepChem API（要 GPU 推奨）<br>
+      <code style="color:var(--muted);">├── playwright_tests/ </code>← E2E テストスクリプト<br>
+      <code style="color:var(--muted);">└── start_servers.bat </code>← 一括起動バッチ
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<footer>
+  <div style="font-size:2rem;margin-bottom:12px;">🔬</div>
+  <strong>MoleculeAI — DeepChem Explorer</strong><br>
+  <span style="color:var(--muted);">
+    Flutter Web × FastAPI × DeepChem × RDKit による分子 ADMET 予測ツール
+  </span>
+  <div style="margin-top:16px;font-size:.8rem;">
+    使用ライブラリ：
+    <a href="#">DeepChem</a> ·
+    <a href="#">RDKit</a> ·
+    <a href="#">Flutter</a> ·
+    <a href="#">FastAPI</a> ·
+    <a href="#">PubChem</a>
+  </div>
+</footer>
+
+</body>
+</html>
