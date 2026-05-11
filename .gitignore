@@ -7,6 +7,7 @@ deepchem-api/
 playwright_tests/
 *.txt
 !requirements.txt
+!runtime.txt
 *.bat
 *.bak
 releases/
