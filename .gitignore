@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+mol_app/
+deepchem-api/
+playwright_tests/
+*.txt
+!requirements.txt
+*.bat
+*.bak
+releases/
