@@ -109,6 +109,63 @@ class ApiService {
     throw ApiException(res.statusCode, 'Server unreachable');
   }
 
+  static Future<Map<String, dynamic>> submitOptimize({
+    required List<String> seeds,
+    required Map<String, dynamic> objectives,
+    int popSize = 40,
+    int nGenerations = 20,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$_base/optimize/submit'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'seeds': seeds,
+        'objectives': objectives,
+        'pop_size': popSize,
+        'n_generations': nGenerations,
+      }),
+    );
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    throw ApiException(res.statusCode, _errorMsg(res));
+  }
+
+  static Future<Map<String, dynamic>> getJob(String jobId) async {
+    final res = await http.get(Uri.parse('$_base/jobs/$jobId'));
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    throw ApiException(res.statusCode, _errorMsg(res));
+  }
+
+  static Future<List<Map<String, dynamic>>> predictBatchForGA(
+      List<String> smilesList) async {
+    final res = await http.post(
+      Uri.parse('$_base/predict/batch'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'smiles_list': smilesList}),
+    );
+    if (res.statusCode != 200) throw ApiException(res.statusCode, _errorMsg(res));
+    final data = jsonDecode(res.body);
+    return (data['results'] as List).map<Map<String, dynamic>>((e) {
+      final m = e as Map<String, dynamic>;
+      final d = (m['descriptors'] as Map<String, dynamic>?) ?? {};
+      final dl = (m['drug_likeness'] as Map<String, dynamic>?) ?? {};
+      final preds = (m['predictions'] as Map<String, dynamic>?) ?? {};
+      final bbbp = (preds['bbbp'] as Map<String, dynamic>?) ?? {};
+      final sol = (preds['solubility'] as Map<String, dynamic>?) ?? {};
+      return {
+        'smiles': m['smiles'],
+        'valid': m['valid'] ?? false,
+        'mw': d['molecular_weight'],
+        'logP': d['logp'],
+        'tpsa': d['tpsa'],
+        'hbd': d['hbd'],
+        'hba': d['hba'],
+        'qed': dl['qed'],
+        'bbbp': bbbp['probability'],
+        'logS': sol['logS'],
+      };
+    }).toList();
+  }
+
   static String _errorMsg(http.Response res) {
     try {
       return jsonDecode(res.body)['detail'] ?? 'Error ${res.statusCode}';

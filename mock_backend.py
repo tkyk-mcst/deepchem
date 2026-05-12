@@ -4,9 +4,9 @@ Uses RDKit for real descriptor calculations.
 ML predictions are mock values (no DeepChem needed).
 Run: python mock_backend.py
 """
-import math, random, io, json
+import math, random, io, json, asyncio, uuid, time, sys, os
 from contextlib import asynccontextmanager
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
@@ -18,6 +18,28 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors, rdMolDescriptors, QED, AllChem, rdDepictor
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem import FilterCatalog
+
+# ── Optimization imports (requires selfies) ────────────────────────────────
+sys.path.insert(0, os.path.dirname(__file__))
+try:
+    import selfies as sf
+    from optimization.selfies_utils import smiles_to_selfies_safe, is_valid
+    from optimization.genetic_algorithm import make_score_fn, run_ga
+    _OPT_AVAILABLE = True
+except ImportError:
+    _OPT_AVAILABLE = False
+
+# ── SA Score (optional, from rdkit.Contrib) ────────────────────────────────
+try:
+    from rdkit.Contrib.SA_Score import sascorer as _sascorer
+    def _sa_score(mol):
+        return round(_sascorer.calculateScore(mol), 3)
+except ImportError:
+    def _sa_score(mol):
+        return None
+
+# ── In-memory job store ────────────────────────────────────────────────────
+_jobs: Dict[str, Dict] = {}
 
 # ── PAINS catalog ──────────────────────────────────────────────────────────
 _pains_cat = None
@@ -341,6 +363,124 @@ async def pubchem_search(name: str = Query(...)):
     except HTTPException: raise
     except httpx.TimeoutException: raise HTTPException(504, "PubChem timeout")
     except Exception as e: raise HTTPException(500, f"PubChem error: {e}")
+
+# ── GA Optimization ────────────────────────────────────────────────────────
+
+def _compute_for_ga(selfies_str: str) -> dict:
+    """Compute flat property dict for a SELFIES string (used by score_fn)."""
+    try:
+        smiles = sf.decoder(selfies_str)
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return {"valid": False}
+        d = rdkit_descriptors(mol)
+        dl = drug_likeness(mol)
+        preds = mock_predictions(mol)
+        return {
+            "valid": True,
+            "qed":   dl.get("qed"),
+            "sa_score": _sa_score(mol),
+            "logP":  d["logp"],
+            "tpsa":  d["tpsa"],
+            "mw":    d["molecular_weight"],
+            "hbd":   d["hbd"],
+            "hba":   d["hba"],
+            "bbbp":  preds["bbbp"]["probability"],
+            "logS":  preds["solubility"]["logS"],
+        }
+    except Exception:
+        return {"valid": False}
+
+
+def _props_for_result(smiles: str) -> dict:
+    """Flat property dict for enriching GA result entries."""
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return {}
+    d = rdkit_descriptors(mol)
+    dl = drug_likeness(mol)
+    preds = mock_predictions(mol)
+    return {
+        "qed":      dl.get("qed"),
+        "sa_score": _sa_score(mol),
+        "logP":     d["logp"],
+        "tpsa":     d["tpsa"],
+        "mw":       d["molecular_weight"],
+        "hbd":      d["hbd"],
+        "hba":      d["hba"],
+        "bbbp":     preds["bbbp"]["probability"],
+        "logS":     preds["solubility"]["logS"],
+    }
+
+
+def _optimize_sync(seeds_selfies: list, objectives: dict,
+                   pop_size: int, n_generations: int) -> dict:
+    score_fn = make_score_fn(objectives, _compute_for_ga)
+    results = run_ga(seeds_selfies, score_fn,
+                     pop_size=pop_size, n_generations=n_generations)
+    enriched = []
+    for r in results[:50]:
+        props = _props_for_result(r["smiles"])
+        enriched.append({**r, "properties": props})
+    return {"n_results": len(enriched), "results": enriched}
+
+
+async def _run_job_bg(job_id: str, seeds_selfies: list, objectives: dict,
+                      pop_size: int, n_generations: int):
+    _jobs[job_id]["status"] = "running"
+    try:
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None, lambda: _optimize_sync(seeds_selfies, objectives,
+                                         pop_size, n_generations)
+        )
+        _jobs[job_id].update({
+            "status": "done",
+            "n_results": result["n_results"],
+            "results": result["results"],
+            "finished_at": time.time(),
+        })
+    except Exception as e:
+        _jobs[job_id].update({"status": "error", "error": str(e)})
+
+
+class OptimizeReq(BaseModel):
+    seeds: List[str]
+    objectives: dict = {"qed": {"mode": "maximize", "weight": 1.0},
+                        "sa_score": {"mode": "minimize", "weight": 0.5}}
+    pop_size: int = 40
+    n_generations: int = 20
+
+
+@app.post("/optimize/submit")
+async def optimize_submit(req: OptimizeReq):
+    if not _OPT_AVAILABLE:
+        raise HTTPException(503, "selfies package not installed — run: pip install selfies")
+    selfies_seeds = []
+    for seed in req.seeds:
+        sel = smiles_to_selfies_safe(seed.strip())
+        if sel:
+            selfies_seeds.append(sel)
+    if not selfies_seeds:
+        raise HTTPException(400, "No valid seed molecules provided")
+    job_id = str(uuid.uuid4())[:8]
+    _jobs[job_id] = {
+        "job_id": job_id,
+        "status": "pending",
+        "created_at": time.time(),
+        "method": "GA",
+    }
+    asyncio.create_task(_run_job_bg(job_id, selfies_seeds,
+                                    req.objectives, req.pop_size, req.n_generations))
+    return {"job_id": job_id, "status": "pending", "method": "GA"}
+
+
+@app.get("/jobs/{job_id}")
+def get_job_status(job_id: str):
+    if job_id not in _jobs:
+        raise HTTPException(404, f"Job '{job_id}' not found")
+    return _jobs[job_id]
+
 
 if __name__ == "__main__":
     import uvicorn

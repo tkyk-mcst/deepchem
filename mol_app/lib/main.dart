@@ -5,6 +5,7 @@ import 'screens/predict_screen.dart';
 import 'screens/batch_screen.dart';
 import 'screens/compare_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/optimize_screen.dart';
 
 void main() {
   runApp(const MolApp());
@@ -115,6 +116,7 @@ class _AppShellState extends State<AppShell> {
     (Icons.table_chart_outlined,   Icons.table_chart,   'Batch'),
     (Icons.compare_outlined,       Icons.compare,       'Compare'),
     (Icons.search,                 Icons.search,        'Search'),
+    (Icons.auto_awesome_outlined,  Icons.auto_awesome,  'GA Opt'),
   ];
 
   void _navigateToPredict(String smiles) {
@@ -132,6 +134,7 @@ class _AppShellState extends State<AppShell> {
       const BatchScreen(),
       const CompareScreen(),
       SearchScreen(onPredict: _navigateToPredict),
+      const OptimizeScreen(),
     ];
 
     return Scaffold(
