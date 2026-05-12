@@ -210,16 +210,31 @@ class PredictionsCard extends StatelessWidget {
       title: 'ML Model Predictions',
       child: Column(
         children: [
+          // ── Regression ────────────────────────────────────────────────
           if (predictions['solubility'] != null)
             _SolubilityTile(predictions['solubility']),
+          if (predictions['freesolv'] != null)
+            _RegTile('Hydration Free Energy', predictions['freesolv'],
+                valueKey: 'dG', icon: Icons.thermostat),
+          if (predictions['lipo'] != null)
+            _RegTile('Lipophilicity (logD)', predictions['lipo'],
+                valueKey: 'logD', icon: Icons.oil_barrel),
+          // ── Binary classification ──────────────────────────────────────
           if (predictions['bbbp'] != null)
             _BinaryTile('BBB Permeability', predictions['bbbp'], Icons.psychology),
+          if (predictions['bace'] != null)
+            _BinaryTile('BACE-1 Inhibition', predictions['bace'], Icons.medication),
           if (predictions['hiv'] != null)
             _BinaryTile('HIV Activity', predictions['hiv'], Icons.biotech, invertColor: true),
+          // ── Multitask classification ───────────────────────────────────
           if (predictions['tox21'] != null)
             _MultitaskTile('Tox21 Endpoints', predictions['tox21']),
           if (predictions['clintox'] != null)
             _MultitaskTile('ClinTox', predictions['clintox']),
+          if (predictions['sider'] != null)
+            _MultitaskTile('SIDER Side Effects', predictions['sider']),
+          if (predictions['muv'] != null)
+            _MultitaskTile('MUV Bioassays', predictions['muv']),
         ],
       ),
     );
@@ -253,6 +268,41 @@ class _SolubilityTile extends StatelessWidget {
               style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
           if (unc != null)
             Text('± ${unc['std']}', style: const TextStyle(fontSize: 10, color: Colors.white38)),
+        ],
+      ),
+    );
+  }
+}
+
+class _RegTile extends StatelessWidget {
+  final String title;
+  final Map<String, dynamic> data;
+  final String valueKey;
+  final IconData icon;
+
+  const _RegTile(this.title, this.data, {required this.valueKey, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final val = data[valueKey];
+    final unit = data['unit'] ?? '';
+    final label = data['label'] ?? '';
+    final unc = data['uncertainty'];
+    return ListTile(
+      dense: true,
+      leading: Icon(icon, color: Colors.tealAccent, size: 20),
+      title: Text(title),
+      subtitle: Text(label, style: const TextStyle(color: Colors.tealAccent, fontSize: 12)),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text('$val${unit.isNotEmpty ? ' $unit' : ''}',
+              style: const TextStyle(
+                  color: Colors.tealAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+          if (unc != null && unc['std'] != null)
+            Text('± ${unc['std']}',
+                style: const TextStyle(fontSize: 10, color: Colors.white38)),
         ],
       ),
     );

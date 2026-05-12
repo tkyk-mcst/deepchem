@@ -97,15 +97,21 @@ class MoleculePredictor:
         self._featurizer = dc.feat.CircularFingerprint(size=FP_SIZE, radius=FP_RADIUS)
         self.models: dict = {}
         self.tasks:  dict = {}
-        self.sol_transformers = None
+        self._transformers: dict = {}
+        self.sol_transformers = None  # kept for backward compat
 
     def initialize(self):
         specs = [
             ("solubility", 1,  "regressor"),
+            ("freesolv",   1,  "regressor"),
+            ("lipo",       1,  "regressor"),
             ("bbbp",       1,  "classifier"),
+            ("bace",       1,  "classifier"),
             ("tox21",      12, "classifier"),
             ("clintox",    2,  "classifier"),
             ("hiv",        1,  "classifier"),
+            ("sider",      27, "classifier"),
+            ("muv",        17, "classifier"),
         ]
         for name, default_n, kind in specs:
             mdir = os.path.join(MODEL_DIR, name)
@@ -124,10 +130,13 @@ class MoleculePredictor:
             except Exception as e:
                 logger.error(f"[{name}] load failed: {e}")
 
-        tp = os.path.join(MODEL_DIR, "solubility", "transformers.pkl")
-        if os.path.exists(tp):
-            with open(tp, "rb") as f:
-                self.sol_transformers = pickle.load(f)
+        for reg_name in ("solubility", "freesolv", "lipo"):
+            tp = os.path.join(MODEL_DIR, reg_name, "transformers.pkl")
+            if os.path.exists(tp):
+                with open(tp, "rb") as f:
+                    self._transformers[reg_name] = pickle.load(f)
+        # backward-compat alias
+        self.sol_transformers = self._transformers.get("solubility")
 
         # warm up PAINS catalog
         try:
@@ -374,39 +383,65 @@ class MoleculePredictor:
 
     def _run_all_predictions(self, smiles, dataset) -> dict:
         result = {}
+        # ── Regression ──────────────────────────────────────────────────
         if "solubility" in self.models:
-            result["solubility"] = self._predict_solubility(dataset)
+            result["solubility"] = self._predict_regression(
+                "solubility", dataset,
+                value_key="logS", unit="log(mol/L)", label_fn=_solubility_label,
+            )
+        if "freesolv" in self.models:
+            result["freesolv"] = self._predict_regression(
+                "freesolv", dataset,
+                value_key="dG", unit="kcal/mol", label_fn=_freesolv_label,
+            )
+        if "lipo" in self.models:
+            result["lipo"] = self._predict_regression(
+                "lipo", dataset,
+                value_key="logD", unit="", label_fn=_lipo_label,
+            )
+        # ── Binary classification ────────────────────────────────────────
         if "bbbp" in self.models:
             result["bbbp"] = self._predict_binary(
                 "bbbp", dataset, label_true="Permeable", label_false="Not Permeable"
+            )
+        if "bace" in self.models:
+            result["bace"] = self._predict_binary(
+                "bace", dataset, label_true="Inhibitor", label_false="Non-Inhibitor"
             )
         if "hiv" in self.models:
             result["hiv"] = self._predict_binary(
                 "hiv", dataset, label_true="Active", label_false="Inactive"
             )
+        # ── Multitask classification ─────────────────────────────────────
         if "tox21" in self.models:
             result["tox21"] = self._predict_multitask("tox21", dataset)
         if "clintox" in self.models:
             result["clintox"] = self._predict_multitask("clintox", dataset)
+        if "sider" in self.models:
+            result["sider"] = self._predict_multitask("sider", dataset)
+        if "muv" in self.models:
+            result["muv"] = self._predict_multitask("muv", dataset)
         return result
 
-    def _predict_solubility(self, dataset) -> dict:
+    def _predict_regression(self, name: str, dataset,
+                             value_key: str, unit: str, label_fn) -> dict:
         try:
-            model = self.models["solubility"]
+            model = self.models[name]
             pred = model.predict(dataset)
-            if self.sol_transformers:
-                for t in reversed(self.sol_transformers):
+            transformers = self._transformers.get(name)
+            if transformers:
+                for t in reversed(transformers):
                     pred = t.untransform(pred)
             val = float(pred[0][0])
             uncertainty = self._dropout_uncertainty_regression(model, dataset)
             return {
-                "logS":        round(val, 3),
-                "unit":        "log(mol/L)",
-                "label":       _solubility_label(val),
+                value_key:     round(val, 3),
+                "unit":        unit,
+                "label":       label_fn(val),
                 "uncertainty": uncertainty,
             }
         except Exception as e:
-            logger.warning(f"solubility prediction error: {e}")
+            logger.warning(f"{name} prediction error: {e}")
             return {}
 
     def _predict_binary(self, name, dataset, label_true, label_false) -> dict:
@@ -555,6 +590,20 @@ def _solubility_label(log_s: float) -> str:
     if log_s > -3:  return "Soluble"
     if log_s > -5:  return "Moderately Soluble"
     return "Poorly Soluble"
+
+
+def _freesolv_label(dg: float) -> str:
+    if dg < -10: return "Very Favorable Hydration"
+    if dg < -5:  return "Favorable Hydration"
+    if dg < 0:   return "Moderate Hydration"
+    return "Unfavorable Hydration"
+
+
+def _lipo_label(log_d: float) -> str:
+    if log_d < 0:  return "Hydrophilic"
+    if log_d < 2:  return "Moderate"
+    if log_d < 4:  return "Lipophilic"
+    return "Highly Lipophilic"
 
 
 def _sim_label(sim: float) -> str:

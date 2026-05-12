@@ -3,11 +3,16 @@ Model training script — runs at Docker build time.
 Each model is trained in a separate subprocess to avoid DGL conflicts.
 
 Models trained:
-  1. solubility  — Delaney,  MultitaskRegressor,   1 task  (regression)
-  2. bbbp        — BBBP,     MultitaskClassifier,   1 task  (classification)
-  3. tox21       — Tox21,    MultitaskClassifier,  12 tasks (classification)
-  4. clintox     — ClinTox,  MultitaskClassifier,   2 tasks (classification)
-  5. hiv         — HIV,      MultitaskClassifier,   1 task  (classification)
+  1. solubility  — Delaney,        MultitaskRegressor,   1 task  (regression)
+  2. freesolv    — FreeSolv,       MultitaskRegressor,   1 task  (regression)
+  3. lipo        — Lipophilicity,  MultitaskRegressor,   1 task  (regression)
+  4. bbbp        — BBBP,           MultitaskClassifier,  1 task  (classification)
+  5. bace        — BACE,           MultitaskClassifier,  1 task  (classification)
+  6. tox21       — Tox21,          MultitaskClassifier, 12 tasks (classification)
+  7. clintox     — ClinTox,        MultitaskClassifier,  2 tasks (classification)
+  8. hiv         — HIV,            MultitaskClassifier,  1 task  (classification)
+  9. sider       — SIDER,          MultitaskClassifier, 27 tasks (classification)
+ 10. muv         — MUV,            MultitaskClassifier, 17 tasks (classification)
 """
 
 import os
@@ -182,14 +187,143 @@ def train_hiv():
     logger.info(f"  Saved to {out}")
 
 
+def train_freesolv():
+    import pickle, deepchem as dc
+    out = os.path.join(MODEL_DIR, "freesolv")
+    os.makedirs(out, exist_ok=True)
+
+    logger.info("Loading FreeSolv (hydration free energy)...")
+    tasks, datasets, transformers = dc.molnet.load_freesolv(
+        featurizer=_featurizer(), splitter="scaffold"
+    )
+    train, valid, test = datasets
+    logger.info(f"  {len(train)} train / {len(test)} test")
+
+    model = _regressor(1, out)
+    model.fit(train, nb_epoch=80, checkpoint_interval=80)
+    model.save_checkpoint()
+
+    score = model.evaluate(test, [dc.metrics.Metric(dc.metrics.pearson_r2_score)], transformers)
+    logger.info(f"  FreeSolv R2: {score}")
+
+    with open(os.path.join(out, "transformers.pkl"), "wb") as f:
+        pickle.dump(transformers, f)
+    with open(os.path.join(out, "tasks.pkl"), "wb") as f:
+        pickle.dump(tasks, f)
+    logger.info(f"  Saved to {out}")
+
+
+def train_lipo():
+    import pickle, deepchem as dc
+    out = os.path.join(MODEL_DIR, "lipo")
+    os.makedirs(out, exist_ok=True)
+
+    logger.info("Loading Lipophilicity (logD)...")
+    tasks, datasets, transformers = dc.molnet.load_lipo(
+        featurizer=_featurizer(), splitter="scaffold"
+    )
+    train, valid, test = datasets
+    logger.info(f"  {len(train)} train / {len(test)} test")
+
+    model = _regressor(1, out)
+    model.fit(train, nb_epoch=60, checkpoint_interval=60)
+    model.save_checkpoint()
+
+    score = model.evaluate(test, [dc.metrics.Metric(dc.metrics.pearson_r2_score)], transformers)
+    logger.info(f"  Lipo R2: {score}")
+
+    with open(os.path.join(out, "transformers.pkl"), "wb") as f:
+        pickle.dump(transformers, f)
+    with open(os.path.join(out, "tasks.pkl"), "wb") as f:
+        pickle.dump(tasks, f)
+    logger.info(f"  Saved to {out}")
+
+
+def train_bace():
+    import pickle, deepchem as dc
+    out = os.path.join(MODEL_DIR, "bace")
+    os.makedirs(out, exist_ok=True)
+
+    logger.info("Loading BACE (β-secretase inhibition)...")
+    tasks, datasets, transformers = dc.molnet.load_bace_classification(
+        featurizer=_featurizer(), splitter="scaffold"
+    )
+    train, valid, test = datasets
+    logger.info(f"  {len(train)} train / {len(test)} test, tasks: {tasks}")
+
+    model = _classifier(len(tasks), out)
+    model.fit(train, nb_epoch=50, checkpoint_interval=50)
+    model.save_checkpoint()
+
+    score = model.evaluate(test, [dc.metrics.Metric(dc.metrics.roc_auc_score)], transformers)
+    logger.info(f"  BACE AUC: {score}")
+
+    with open(os.path.join(out, "tasks.pkl"), "wb") as f:
+        pickle.dump(tasks, f)
+    logger.info(f"  Saved to {out}")
+
+
+def train_sider():
+    import pickle, deepchem as dc
+    out = os.path.join(MODEL_DIR, "sider")
+    os.makedirs(out, exist_ok=True)
+
+    logger.info("Loading SIDER (27 side-effect endpoints)...")
+    tasks, datasets, transformers = dc.molnet.load_sider(
+        featurizer=_featurizer(), splitter="scaffold"
+    )
+    train, valid, test = datasets
+    logger.info(f"  {len(train)} train / {len(test)} test, tasks: {len(tasks)}")
+
+    model = _classifier(len(tasks), out)
+    model.fit(train, nb_epoch=40, checkpoint_interval=40)
+    model.save_checkpoint()
+
+    score = model.evaluate(test, [dc.metrics.Metric(dc.metrics.roc_auc_score)], transformers)
+    logger.info(f"  SIDER AUC: {score}")
+
+    with open(os.path.join(out, "tasks.pkl"), "wb") as f:
+        pickle.dump(tasks, f)
+    logger.info(f"  Saved to {out}")
+
+
+def train_muv():
+    import pickle, deepchem as dc
+    out = os.path.join(MODEL_DIR, "muv")
+    os.makedirs(out, exist_ok=True)
+
+    logger.info("Loading MUV (17 virtual screening assays)...")
+    tasks, datasets, transformers = dc.molnet.load_muv(
+        featurizer=_featurizer(), splitter="scaffold"
+    )
+    train, valid, test = datasets
+    logger.info(f"  {len(train)} train / {len(test)} test, tasks: {len(tasks)}")
+
+    model = _classifier(len(tasks), out)
+    model.fit(train, nb_epoch=20, checkpoint_interval=20)
+    model.save_checkpoint()
+
+    score = model.evaluate(test, [dc.metrics.Metric(dc.metrics.roc_auc_score)], transformers)
+    logger.info(f"  MUV AUC: {score}")
+
+    with open(os.path.join(out, "tasks.pkl"), "wb") as f:
+        pickle.dump(tasks, f)
+    logger.info(f"  Saved to {out}")
+
+
 # ── Entry point ────────────────────────────────────────────────────────────
 
 TASKS = {
     "solubility": train_solubility,
+    "freesolv":   train_freesolv,
+    "lipo":       train_lipo,
     "bbbp":       train_bbbp,
+    "bace":       train_bace,
     "tox21":      train_tox21,
     "clintox":    train_clintox,
     "hiv":        train_hiv,
+    "sider":      train_sider,
+    "muv":        train_muv,
 }
 
 if __name__ == "__main__":
