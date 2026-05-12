@@ -1,34 +1,20 @@
-# DeepChem MolAI — Flutter Web Frontend
+# DeepChem MolAI Frontend (Flutter Web)
 
-Flutter Web frontend for ADMET property prediction (RDKit + mock ML).
+Flutter Web フロントエンドのソースコードです。
+セットアップ手順はリポジトリルートの [README.md](../README.md) を参照してください。
 
-## Backend
+## API URL の変更
 
-- Repo: https://github.com/tkyk-mcst/deepchem-molai-backend
-- Demo API: https://deepchem-api.onrender.com
-- Demo App: https://deepchem-molai.vercel.app
-
-## Setup
-
-```bash
-flutter pub get
-flutter build web --release
-```
-
-Change API URL in `lib/config/app_config.dart`:
+`lib/config/app_config.dart` を編集してから再ビルドする:
 
 ```dart
 static const String apiBaseUrl = 'http://localhost:8282';
 ```
 
-## Features
+## ビルド
 
-- Predict: SMILES → ADMET properties (MW, logP, TPSA, QED, SA Score, BBB, hERG, CYP3A4, PAINS/Brenk)
-- Batch: Up to 100 molecules
-- Compare: Tanimoto similarity + property diff
-- Search: PubChem name search
-
-## Notes
-
-- Mock ML predictions (formula-based, not trained models)
-- For real DeepChem models, replace mock_backend.py with deepchem-api/
+```bash
+flutter pub get
+flutter build web --release
+# → build/web/ に出力される
+```
