@@ -29,3 +29,6 @@ playwright_tests/*.png
 !requirements.txt
 !runtime.txt
 !sample_batch.csv
+node_modules/
+package.json
+package-lock.json

@@ -25,7 +25,11 @@ from rdkit.Chem import FilterCatalog
 
 logger = logging.getLogger(__name__)
 
-MODEL_DIR  = os.environ.get("MODEL_DIR", "/app/saved_models")
+_default_model_dir = "/app/saved_models"
+_local_model_dir   = os.path.join(os.path.dirname(__file__), "saved_models")
+if not os.environ.get("MODEL_DIR") and os.path.isdir(_local_model_dir):
+    _default_model_dir = _local_model_dir
+MODEL_DIR = os.environ.get("MODEL_DIR", _default_model_dir)
 FP_SIZE    = 2048
 FP_RADIUS  = 4
 N_DROPOUT_SAMPLES = 20
