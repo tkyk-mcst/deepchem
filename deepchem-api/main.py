@@ -18,9 +18,14 @@ Endpoints:
 """
 
 import logging
+import asyncio
+import uuid
+import time
+import sys
+import os
 import httpx
 from contextlib import asynccontextmanager
-from typing import List
+from typing import List, Dict
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +34,18 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from predictor import MoleculePredictor
+
+# ── Optimization imports ───────────────────────────────────────────────────
+sys.path.insert(0, os.path.dirname(__file__))
+try:
+    from optimization.selfies_utils import smiles_to_selfies_safe, is_valid
+    from optimization.genetic_algorithm import make_score_fn, run_ga
+    _OPT_AVAILABLE = True
+except ImportError:
+    _OPT_AVAILABLE = False
+
+# ── In-memory job store ────────────────────────────────────────────────────
+_jobs: Dict[str, Dict] = {}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -296,3 +313,80 @@ async def pubchem_search(
     except Exception as e:
         logger.exception("PubChem search failed")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── GA Optimization ────────────────────────────────────────────────────────
+
+class OptimizeRequest(BaseModel):
+    seeds: List[str]
+    objectives: dict = {"qed": {"mode": "maximize", "weight": 1.0},
+                        "sa_score": {"mode": "minimize", "weight": 0.5}}
+    pop_size: int = 40
+    n_generations: int = 20
+
+
+def _optimize_sync(seeds_selfies: list, objectives: dict,
+                   pop_size: int, n_generations: int) -> dict:
+    score_fn = make_score_fn(objectives, predictor.compute_for_ga)
+    results = run_ga(seeds_selfies, score_fn,
+                     pop_size=pop_size, n_generations=n_generations)
+    enriched = []
+    for r in results[:50]:
+        props = predictor.props_for_result(r["smiles"])
+        enriched.append({**r, "properties": props})
+    return {"n_results": len(enriched), "results": enriched}
+
+
+async def _run_job_bg(job_id: str, seeds_selfies: list, objectives: dict,
+                      pop_size: int, n_generations: int):
+    _jobs[job_id]["status"] = "running"
+    try:
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None, lambda: _optimize_sync(seeds_selfies, objectives,
+                                         pop_size, n_generations)
+        )
+        _jobs[job_id].update({
+            "status":      "done",
+            "n_results":   result["n_results"],
+            "results":     result["results"],
+            "finished_at": time.time(),
+        })
+        logger.info(f"Job {job_id} done: {result['n_results']} results")
+    except Exception as e:
+        logger.exception(f"Job {job_id} failed")
+        _jobs[job_id].update({"status": "error", "error": str(e)})
+
+
+@app.post("/optimize/submit", tags=["Optimization"])
+async def optimize_submit(request: OptimizeRequest):
+    """Submit a SELFIES GA optimization job. Returns job_id immediately."""
+    if not _OPT_AVAILABLE:
+        raise HTTPException(503, "selfies package not installed")
+    selfies_seeds = []
+    for seed in request.seeds:
+        sel = smiles_to_selfies_safe(seed.strip())
+        if sel:
+            selfies_seeds.append(sel)
+    if not selfies_seeds:
+        raise HTTPException(400, "No valid seed molecules provided")
+    job_id = str(uuid.uuid4())[:8]
+    _jobs[job_id] = {
+        "job_id":     job_id,
+        "status":     "pending",
+        "created_at": time.time(),
+        "method":     "GA",
+    }
+    asyncio.create_task(_run_job_bg(job_id, selfies_seeds,
+                                    request.objectives,
+                                    request.pop_size,
+                                    request.n_generations))
+    return {"job_id": job_id, "status": "pending", "method": "GA"}
+
+
+@app.get("/jobs/{job_id}", tags=["Optimization"])
+def get_job(job_id: str):
+    """Poll a GA job for status and results."""
+    if job_id not in _jobs:
+        raise HTTPException(404, f"Job '{job_id}' not found")
+    return _jobs[job_id]

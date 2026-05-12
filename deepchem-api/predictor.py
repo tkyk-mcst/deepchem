@@ -265,6 +265,71 @@ class MoleculePredictor:
             "similarity": sim,
         }
 
+    def compute_for_ga(self, selfies_str: str) -> dict:
+        """Flat property dict for GA score function. Uses real DeepChem predictions."""
+        try:
+            import selfies as sf
+            smiles = sf.decoder(selfies_str)
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                return {"valid": False}
+            result = self.predict(smiles)
+            d     = result.get("descriptors", {})
+            dl    = result.get("drug_likeness", {})
+            preds = result.get("predictions", {})
+            bbbp  = preds.get("bbbp", {})
+            sol   = preds.get("solubility", {})
+            try:
+                from rdkit.Contrib.SA_Score import sascorer
+                sa = round(sascorer.calculateScore(mol), 3)
+            except ImportError:
+                sa = None
+            return {
+                "valid":    True,
+                "qed":      dl.get("qed"),
+                "sa_score": sa,
+                "logP":     d.get("logp"),
+                "tpsa":     d.get("tpsa"),
+                "mw":       d.get("molecular_weight"),
+                "hbd":      d.get("hbd"),
+                "hba":      d.get("hba"),
+                "bbbp":     bbbp.get("probability"),
+                "logS":     sol.get("logS"),
+            }
+        except Exception:
+            return {"valid": False}
+
+    def props_for_result(self, smiles: str) -> dict:
+        """Flat property dict to enrich GA result entries."""
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                return {}
+            result = self.predict(smiles)
+            d     = result.get("descriptors", {})
+            dl    = result.get("drug_likeness", {})
+            preds = result.get("predictions", {})
+            bbbp  = preds.get("bbbp", {})
+            sol   = preds.get("solubility", {})
+            try:
+                from rdkit.Contrib.SA_Score import sascorer
+                sa = round(sascorer.calculateScore(mol), 3)
+            except ImportError:
+                sa = None
+            return {
+                "qed":      dl.get("qed"),
+                "sa_score": sa,
+                "logP":     d.get("logp"),
+                "tpsa":     d.get("tpsa"),
+                "mw":       d.get("molecular_weight"),
+                "hbd":      d.get("hbd"),
+                "hba":      d.get("hba"),
+                "bbbp":     bbbp.get("probability"),
+                "logS":     sol.get("logS"),
+            }
+        except Exception:
+            return {}
+
     def get_variants(self, smiles: str, n_variants: int = 6) -> list:
         """Generate simple analogs by swapping common fragments."""
         mol = Chem.MolFromSmiles(smiles)
