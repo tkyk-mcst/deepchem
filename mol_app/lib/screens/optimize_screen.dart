@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/api_service.dart';
+import '../widgets/molecule_image.dart';
 
 // ── Job data model ─────────────────────────────────────────────────────────────
 
@@ -45,7 +46,10 @@ class OptimizeScreen extends StatefulWidget {
   State<OptimizeScreen> createState() => _OptimizeScreenState();
 }
 
-class _OptimizeScreenState extends State<OptimizeScreen> {
+class _OptimizeScreenState extends State<OptimizeScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final _seedCtrl = TextEditingController(text: 'CC(=O)Oc1ccccc1C(=O)O');
   int _popSize = 40;
   int _nGen = 20;
@@ -168,6 +172,7 @@ class _OptimizeScreenState extends State<OptimizeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final running = _submitting || (_currentJob?.isActive == true);
     return Scaffold(
       appBar: AppBar(
@@ -236,17 +241,7 @@ class _OptimizeScreenState extends State<OptimizeScreen> {
                                     fontFamily: 'monospace'),
                               ),
                               const SizedBox(height: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.network(
-                                  ApiService.imageUrl(smiles, w: 280, h: 160),
-                                  width: 280,
-                                  height: 160,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) =>
-                                      const SizedBox.shrink(),
-                                ),
-                              ),
+                              MoleculeImage(smiles: smiles, width: 280, height: 160),
                               const SizedBox(height: 6),
                               Wrap(
                                 spacing: 6, runSpacing: 4,
@@ -696,20 +691,7 @@ class _ResultCardState extends State<_ResultCard> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 if (smiles.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      color: Colors.white,
-                      width: 200, height: 150,
-                      child: Image.network(
-                        ApiService.imageUrl(smiles, w: 200, h: 150),
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Center(
-                            child: Icon(Icons.image_not_supported,
-                                color: Colors.grey)),
-                      ),
-                    ),
-                  ),
+                  MoleculeImage(smiles: smiles, width: 200, height: 150),
                 const SizedBox(width: 16),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Icon(Icons.science, color: Colors.tealAccent, size: 36),
               const SizedBox(width: 12),
               Text(
-                'MolPredict',
+                'DeepChem',
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium

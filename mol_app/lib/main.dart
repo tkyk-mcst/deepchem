@@ -17,7 +17,7 @@ class MolApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MolPredict — Molecular Properties',
+      title: 'DeepChem — Molecular Properties',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -149,7 +149,7 @@ class _AppShellState extends State<AppShell> {
                 const SizedBox(width: 14),
                 const Icon(Icons.biotech, color: Colors.tealAccent, size: 24),
                 const SizedBox(width: 8),
-                const Text('MolPredict',
+                const Text('DeepChem',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
