@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../l10n/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(String smiles) onPredict;
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 32),
           _buildFeatureGrid(context),
           const SizedBox(height: 32),
-          Text('Sample Molecules',
+          Text(context.l10n.homeSampleMolecules,
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
           if (_loading)
@@ -82,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Icon(Icons.science, color: Colors.tealAccent, size: 36),
               const SizedBox(width: 12),
               Text(
-                'DeepChem',
+                context.l10n.homeHeadline,
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium
@@ -92,8 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Comprehensive molecular property prediction powered by DeepChem & RDKit.\n'
-            'Predict solubility, BBB permeability, toxicity, drug-likeness and more.',
+            context.l10n.homeSubtitle,
             style: Theme.of(context)
                 .textTheme
                 .bodyLarge
@@ -283,7 +283,7 @@ class _QuickPredictBarState extends State<_QuickPredictBar> {
             controller: _ctrl,
             style: const TextStyle(fontFamily: 'monospace'),
             decoration: InputDecoration(
-              hintText: 'Enter SMILES (e.g. CC(=O)Oc1ccccc1C(=O)O)',
+              hintText: context.l10n.homeInputHint,
               filled: true,
               fillColor: Colors.black26,
               border: OutlineInputBorder(
@@ -301,7 +301,7 @@ class _QuickPredictBarState extends State<_QuickPredictBar> {
         const SizedBox(width: 10),
         ElevatedButton.icon(
           icon: const Icon(Icons.play_arrow),
-          label: const Text('Predict'),
+          label: Text(context.l10n.homePredictButton),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.tealAccent,
             foregroundColor: Colors.black,

@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../widgets/molecule_image.dart';
 import '../widgets/admet_radar.dart';
 import '../widgets/property_cards.dart';
+import '../l10n/l10n.dart';
 
 class CompareScreen extends StatefulWidget {
   const CompareScreen({super.key});
@@ -54,10 +55,10 @@ class _CompareScreenState extends State<CompareScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Molecule Comparison',
+          Text(context.l10n.compareTitle,
               style: Theme.of(context).textTheme.headlineSmall),
-          const Text('Compare two molecules side-by-side',
-              style: TextStyle(color: Colors.white54)),
+          Text(context.l10n.compareSubtitle,
+              style: const TextStyle(color: Colors.white54)),
           const SizedBox(height: 20),
           _buildInputs(),
           const SizedBox(height: 16),
@@ -84,14 +85,14 @@ class _CompareScreenState extends State<CompareScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Molecule 1',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(context.l10n.compareMol1Label,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: _ctrl1,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
                 decoration: InputDecoration(
-                  hintText: 'SMILES for molecule 1',
+                  hintText: context.l10n.compareMol1Hint,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -109,14 +110,14 @@ class _CompareScreenState extends State<CompareScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Molecule 2',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(context.l10n.compareMol2Label,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: _ctrl2,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
                 decoration: InputDecoration(
-                  hintText: 'SMILES for molecule 2',
+                  hintText: context.l10n.compareMol2Hint,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
@@ -128,7 +129,7 @@ class _CompareScreenState extends State<CompareScreen> {
         const SizedBox(width: 16),
         FilledButton.icon(
           icon: const Icon(Icons.compare),
-          label: const Text('Compare'),
+          label: Text(context.l10n.compareButton),
           onPressed: _loading ? null : _compare,
           style: FilledButton.styleFrom(
             padding:
@@ -221,8 +222,8 @@ class _CompareScreenState extends State<CompareScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Tanimoto Similarity: ',
-                style: TextStyle(color: Colors.white70)),
+            Text(context.l10n.compareTanimoto,
+                style: const TextStyle(color: Colors.white70)),
             Text(
               score.toStringAsFixed(3),
               style: TextStyle(
@@ -303,21 +304,21 @@ class _CompareScreenState extends State<CompareScreen> {
           TableRow(
             decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.white12))),
-            children: const [
+            children: [
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 6),
-                child: Text('Property',
-                    style: TextStyle(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(context.l10n.compareColProperty,
+                    style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.white54, fontSize: 12)),
               ),
-              Text('Molecule 1',
-                  style: TextStyle(
+              Text(context.l10n.compareColMol1,
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold, color: Colors.blueAccent, fontSize: 12)),
-              Text('Δ',
-                  style: TextStyle(
+              Text(context.l10n.compareColDelta,
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold, color: Colors.white38, fontSize: 12)),
-              Text('Molecule 2',
-                  style: TextStyle(
+              Text(context.l10n.compareColMol2,
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold, color: Colors.purpleAccent, fontSize: 12)),
             ],
           ),

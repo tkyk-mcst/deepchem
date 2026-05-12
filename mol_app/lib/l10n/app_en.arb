@@ -1,0 +1,149 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "DeepChem",
+
+  "navHome": "Home",
+  "navPredict": "Predict",
+  "navBatch": "Batch",
+  "navCompare": "Compare",
+  "navSearch": "Search",
+  "navGaOpt": "GA Opt",
+
+  "homeHeadline": "DeepChem",
+  "homeSubtitle": "Comprehensive molecular property prediction powered by DeepChem & RDKit.\nPredict solubility, BBB permeability, toxicity, drug-likeness and more.",
+  "homeInputHint": "Enter SMILES (e.g. CC(=O)Oc1ccccc1C(=O)O)",
+  "homePredictButton": "Predict",
+  "homeSampleMolecules": "Sample Molecules",
+  "homeClickToPredict": "Click to predict",
+
+  "predictTitle": "Predict Properties",
+  "predictSmilesLabel": "SMILES",
+  "predictHint": "Enter SMILES…",
+  "predictButton": "Predict",
+  "predictLoading": "Computing…",
+  "predictExamples": "Examples",
+  "predictEnterPrompt": "Enter SMILES to predict",
+
+  "batchTitle": "Batch Prediction",
+  "batchUploadHint": "Upload CSV or paste SMILES (one per line)",
+  "batchUploadCsv": "Upload CSV",
+  "batchRun": "Run Batch",
+  "batchRunning": "Running...",
+  "batchProgress": "Processing {current} / {total} molecules...",
+  "@batchProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "batchResults": "{count} results",
+  "@batchResults": {
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "batchSort": "Sort: ",
+  "batchColStructure": "Structure",
+  "batchColSmiles": "SMILES",
+  "batchColMw": "MW",
+  "batchColLogp": "LogP",
+  "batchColQed": "QED",
+  "batchColLogs": "logS",
+  "batchColBbb": "BBB%",
+  "batchColDrugLike": "Drug-Like",
+  "batchColAlerts": "Alerts",
+
+  "compareTitle": "Molecule Comparison",
+  "compareSubtitle": "Compare two molecules side-by-side",
+  "compareMol1Label": "Molecule 1",
+  "compareMol1Hint": "SMILES for molecule 1",
+  "compareMol2Label": "Molecule 2",
+  "compareMol2Hint": "SMILES for molecule 2",
+  "compareButton": "Compare",
+  "compareTanimoto": "Tanimoto Similarity: ",
+  "compareColProperty": "Property",
+  "compareColMol1": "Molecule 1",
+  "compareColDelta": "Δ",
+  "compareColMol2": "Molecule 2",
+
+  "searchTitle": "PubChem Search",
+  "searchSubtitle": "Search compounds by name and get SMILES from PubChem",
+  "searchHint": "e.g. aspirin, caffeine, ibuprofen, glucose...",
+  "searchButton": "Search PubChem",
+  "searchFoundResults": "Found {count} result(s)",
+  "@searchFoundResults": {
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "searchQuickSearch": "Quick Search",
+  "searchPredictButton": "Predict Properties",
+
+  "optimizeTitle": "SELFIES Genetic Algorithm",
+  "optimizeSeedLabel": "Seed molecules (SMILES, one per line)",
+  "optimizeShowSeedProps": "Show seed properties",
+  "optimizePopSize": "Pop. size",
+  "optimizeGenerations": "Generations",
+  "optimizeObjectives": "Objectives",
+  "optimizeAdd": "Add",
+  "optimizeStart": "Start Optimization",
+  "optimizeSubmitting": "Submitting…",
+  "optimizeRunning": "Running…",
+  "optimizeEvolving": "Evolving molecules…",
+  "optimizeCandidates": "{count} candidates",
+  "@optimizeCandidates": {
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "optimizeCopySelfies": "Copy SELFIES",
+  "optimizePending": "Pending…",
+  "optimizeDone": "Done",
+  "optimizeFoundCandidates": "{count} candidates found",
+  "@optimizeFoundCandidates": {
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "optimizeError": "Error",
+  "optimizeSetParams": "Set parameters and start optimization",
+  "optimizeSelfiesDesc": "SELFIES strings evolved via genetic algorithm",
+  "optimizeJobLabel": "Job: {id}",
+  "@optimizeJobLabel": {
+    "placeholders": { "id": {"type": "String"} }
+  },
+
+  "cardMolDescriptors": "Molecular Descriptors",
+  "cardDrugLikeness": "Drug-Likeness",
+  "cardMlPredictions": "ML Model Predictions",
+  "cardStructuralAlerts": "Structural Alerts",
+  "cardDrugLike": "Drug-Like ({n} violations)",
+  "@cardDrugLike": {
+    "placeholders": { "n": {"type": "int"} }
+  },
+  "cardNotDrugLike": "Not Drug-Like ({n} violations)",
+  "@cardNotDrugLike": {
+    "placeholders": { "n": {"type": "int"} }
+  },
+  "cardNoAlerts": "No structural alerts",
+  "cardAlertsFound": "{n} alert(s) found",
+  "@cardAlertsFound": {
+    "placeholders": { "n": {"type": "int"} }
+  },
+  "cardPainsLabel": "PAINS:",
+  "cardBrenkLabel": "Brenk:",
+  "cardSolubility": "Aqueous Solubility",
+  "cardBbbp": "BBB Permeability",
+  "cardBace": "BACE-1 Inhibition",
+  "cardHiv": "HIV Activity",
+  "cardTox21": "Tox21 Endpoints",
+  "cardClinTox": "ClinTox",
+  "cardSider": "SIDER Side Effects",
+  "cardMuv": "MUV Bioassays",
+  "cardFreesolv": "Hydration Free Energy",
+  "cardLipo": "Lipophilicity (logD)",
+
+  "commonCopy": "Copy",
+  "commonScore": "score",
+  "commonWeightLabel": "Weight: {w}",
+  "@commonWeightLabel": {
+    "placeholders": { "w": {"type": "String"} }
+  },
+  "commonTarget": "Target",
+  "commonNoMolecule": "No molecule",
+  "commonFormula": "Formula: ",
+  "commonPubchemCid": "PubChem CID: "
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/molecule_image.dart';
+import '../l10n/l10n.dart';
 
 class SearchScreen extends StatefulWidget {
   final void Function(String smiles) onPredict;
@@ -54,11 +55,10 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('PubChem Search',
+          Text(context.l10n.searchTitle,
               style: Theme.of(context).textTheme.headlineSmall),
-          const Text(
-              'Search by compound name to find SMILES and molecular properties',
-              style: TextStyle(color: Colors.white54)),
+          Text(context.l10n.searchSubtitle,
+              style: const TextStyle(color: Colors.white54)),
           const SizedBox(height: 20),
           _buildSearchBar(),
           const SizedBox(height: 24),
@@ -94,7 +94,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: TextField(
             controller: _ctrl,
             decoration: InputDecoration(
-              hintText: 'e.g. aspirin, caffeine, ibuprofen, glucose...',
+              hintText: context.l10n.searchHint,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10)),
@@ -105,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
         const SizedBox(width: 12),
         FilledButton.icon(
           icon: const Icon(Icons.search),
-          label: const Text('Search PubChem'),
+          label: Text(context.l10n.searchButton),
           onPressed: _loading ? null : _search,
           style: FilledButton.styleFrom(
             padding:
@@ -120,7 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Found ${_results.length} result(s)',
+        Text(context.l10n.searchFoundResults(_results.length),
             style: const TextStyle(color: Colors.white70)),
         const SizedBox(height: 12),
         ..._results.map((r) => _ResultCard(
@@ -140,8 +140,8 @@ class _SearchScreenState extends State<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Quick Search',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(context.l10n.searchQuickSearch,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -198,8 +198,8 @@ class _ResultCard extends StatelessWidget {
                   if (result.formula.isNotEmpty)
                     Row(
                       children: [
-                        const Text('Formula: ',
-                            style: TextStyle(
+                        Text(context.l10n.commonFormula,
+                            style: const TextStyle(
                                 color: Colors.white54, fontSize: 12)),
                         Text(result.formula,
                             style: const TextStyle(
@@ -214,7 +214,7 @@ class _ResultCard extends StatelessWidget {
                     ),
                   if (result.cid != null) ...[
                     const SizedBox(height: 4),
-                    Text('PubChem CID: ${result.cid}',
+                    Text('${context.l10n.commonPubchemCid}${result.cid}',
                         style: const TextStyle(
                             color: Colors.white38, fontSize: 11)),
                   ],
@@ -229,7 +229,7 @@ class _ResultCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   FilledButton.icon(
                     icon: const Icon(Icons.play_arrow, size: 16),
-                    label: const Text('Predict Properties'),
+                    label: Text(context.l10n.searchPredictButton),
                     onPressed: () => onPredict(result.smiles),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(

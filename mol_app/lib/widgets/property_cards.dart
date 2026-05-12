@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/l10n.dart';
 
 // ── Generic info card ────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ class DescriptorCard extends StatelessWidget {
     ];
 
     return InfoCard(
-      title: 'Molecular Descriptors',
+      title: context.l10n.cardMolDescriptors,
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -123,7 +124,7 @@ class LipinskiCard extends StatelessWidget {
     final drugLike = drugLikeness['drug_like'] ?? false;
 
     return InfoCard(
-      title: 'Drug-Likeness',
+      title: context.l10n.cardDrugLikeness,
       borderColor: drugLike ? Colors.greenAccent.withOpacity(0.5) : Colors.redAccent.withOpacity(0.4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +138,7 @@ class LipinskiCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                drugLike ? 'Drug-Like ($violations violations)' : 'Not Drug-Like ($violations violations)',
+                drugLike ? context.l10n.cardDrugLike(violations as int) : context.l10n.cardNotDrugLike(violations as int),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: drugLike ? Colors.greenAccent : Colors.redAccent,
@@ -207,34 +208,34 @@ class PredictionsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InfoCard(
-      title: 'ML Model Predictions',
+      title: context.l10n.cardMlPredictions,
       child: Column(
         children: [
           // ── Regression ────────────────────────────────────────────────
           if (predictions['solubility'] != null)
             _SolubilityTile(predictions['solubility']),
           if (predictions['freesolv'] != null)
-            _RegTile('Hydration Free Energy', predictions['freesolv'],
+            _RegTile(context.l10n.cardFreesolv, predictions['freesolv'],
                 valueKey: 'dG', icon: Icons.thermostat),
           if (predictions['lipo'] != null)
-            _RegTile('Lipophilicity (logD)', predictions['lipo'],
+            _RegTile(context.l10n.cardLipo, predictions['lipo'],
                 valueKey: 'logD', icon: Icons.oil_barrel),
           // ── Binary classification ──────────────────────────────────────
           if (predictions['bbbp'] != null)
-            _BinaryTile('BBB Permeability', predictions['bbbp'], Icons.psychology),
+            _BinaryTile(context.l10n.cardBbbp, predictions['bbbp'], Icons.psychology),
           if (predictions['bace'] != null)
-            _BinaryTile('BACE-1 Inhibition', predictions['bace'], Icons.medication),
+            _BinaryTile(context.l10n.cardBace, predictions['bace'], Icons.medication),
           if (predictions['hiv'] != null)
-            _BinaryTile('HIV Activity', predictions['hiv'], Icons.biotech, invertColor: true),
+            _BinaryTile(context.l10n.cardHiv, predictions['hiv'], Icons.biotech, invertColor: true),
           // ── Multitask classification ───────────────────────────────────
           if (predictions['tox21'] != null)
-            _MultitaskTile('Tox21 Endpoints', predictions['tox21']),
+            _MultitaskTile(context.l10n.cardTox21, predictions['tox21']),
           if (predictions['clintox'] != null)
-            _MultitaskTile('ClinTox', predictions['clintox']),
+            _MultitaskTile(context.l10n.cardClinTox, predictions['clintox']),
           if (predictions['sider'] != null)
-            _MultitaskTile('SIDER Side Effects', predictions['sider']),
+            _MultitaskTile(context.l10n.cardSider, predictions['sider']),
           if (predictions['muv'] != null)
-            _MultitaskTile('MUV Bioassays', predictions['muv']),
+            _MultitaskTile(context.l10n.cardMuv, predictions['muv']),
         ],
       ),
     );
@@ -258,7 +259,7 @@ class _SolubilityTile extends StatelessWidget {
     return ListTile(
       dense: true,
       leading: const Icon(Icons.water_drop, color: Colors.blueAccent, size: 20),
-      title: const Text('Aqueous Solubility'),
+      title: Text(context.l10n.cardSolubility),
       subtitle: Text(label, style: TextStyle(color: color, fontSize: 12)),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -406,7 +407,7 @@ class AlertsCard extends StatelessWidget {
     final hasAlerts = alerts['has_alerts'] == true;
 
     return InfoCard(
-      title: 'Structural Alerts',
+      title: context.l10n.cardStructuralAlerts,
       borderColor: hasAlerts
           ? Colors.orangeAccent.withOpacity(0.5)
           : Colors.greenAccent.withOpacity(0.4),
@@ -423,8 +424,8 @@ class AlertsCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 hasAlerts
-                    ? '${pains.length + brenk.length} alert(s) found'
-                    : 'No structural alerts',
+                    ? context.l10n.cardAlertsFound(pains.length + brenk.length)
+                    : context.l10n.cardNoAlerts,
                 style: TextStyle(
                     color: hasAlerts ? Colors.orangeAccent : Colors.greenAccent,
                     fontWeight: FontWeight.w600),
@@ -433,7 +434,7 @@ class AlertsCard extends StatelessWidget {
           ),
           if (pains.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Text('PAINS:', style: TextStyle(fontSize: 12, color: Colors.white54)),
+            Text(context.l10n.cardPainsLabel, style: const TextStyle(fontSize: 12, color: Colors.white54)),
             const SizedBox(height: 4),
             Wrap(
               spacing: 6,
@@ -449,7 +450,7 @@ class AlertsCard extends StatelessWidget {
           ],
           if (brenk.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Text('Brenk:', style: TextStyle(fontSize: 12, color: Colors.white54)),
+            Text(context.l10n.cardBrenkLabel, style: const TextStyle(fontSize: 12, color: Colors.white54)),
             const SizedBox(height: 4),
             Wrap(
               spacing: 6,

@@ -5,6 +5,7 @@ import 'package:csv/csv.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../widgets/molecule_image.dart';
+import '../l10n/l10n.dart';
 
 class BatchScreen extends StatefulWidget {
   const BatchScreen({super.key});
@@ -128,22 +129,22 @@ class _BatchScreenState extends State<BatchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Batch Prediction',
+          Text(context.l10n.batchTitle,
               style: Theme.of(context).textTheme.headlineSmall),
-          const Text('Upload CSV or paste SMILES (one per line)',
-              style: TextStyle(color: Colors.white54)),
+          Text(context.l10n.batchUploadHint,
+              style: const TextStyle(color: Colors.white54)),
           const SizedBox(height: 20),
           Row(
             children: [
               OutlinedButton.icon(
                 icon: const Icon(Icons.upload_file),
-                label: const Text('Upload CSV'),
+                label: Text(context.l10n.batchUploadCsv),
                 onPressed: _pickCsv,
               ),
               const SizedBox(width: 12),
               FilledButton.icon(
                 icon: const Icon(Icons.play_arrow),
-                label: Text(_loading ? 'Running...' : 'Run Batch'),
+                label: Text(_loading ? context.l10n.batchRunning : context.l10n.batchRun),
                 onPressed: _loading ? null : _runBatch,
               ),
             ],
@@ -169,7 +170,7 @@ class _BatchScreenState extends State<BatchScreen> {
             LinearProgressIndicator(
                 value: _total > 0 ? _progress / _total : null),
             const SizedBox(height: 6),
-            Text('Processing $_progress / $_total molecules...',
+            Text(context.l10n.batchProgress(_progress, _total),
                 style: const TextStyle(color: Colors.white54, fontSize: 12)),
           ],
           if (_error != null)
@@ -182,11 +183,11 @@ class _BatchScreenState extends State<BatchScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Text('${_results.length} results',
+                Text(context.l10n.batchResults(_results.length),
                     style: Theme.of(context).textTheme.titleMedium),
                 const Spacer(),
-                const Text('Sort: ',
-                    style: TextStyle(fontSize: 13, color: Colors.white54)),
+                Text(context.l10n.batchSort,
+                    style: const TextStyle(fontSize: 13, color: Colors.white54)),
                 DropdownButton<String>(
                   value: _sortBy,
                   underline: const SizedBox(),
@@ -229,16 +230,16 @@ class _BatchScreenState extends State<BatchScreen> {
             headingRowHeight: 40,
             dataRowMinHeight: 60,
             dataRowMaxHeight: 80,
-            columns: const [
-              DataColumn(label: Text('Structure')),
-              DataColumn(label: Text('SMILES')),
-              DataColumn(label: Text('MW'), numeric: true),
-              DataColumn(label: Text('LogP'), numeric: true),
-              DataColumn(label: Text('QED'), numeric: true),
-              DataColumn(label: Text('logS'), numeric: true),
-              DataColumn(label: Text('BBB%'), numeric: true),
-              DataColumn(label: Text('Drug-Like')),
-              DataColumn(label: Text('Alerts')),
+            columns: [
+              DataColumn(label: Text(context.l10n.batchColStructure)),
+              DataColumn(label: Text(context.l10n.batchColSmiles)),
+              DataColumn(label: Text(context.l10n.batchColMw), numeric: true),
+              DataColumn(label: Text(context.l10n.batchColLogp), numeric: true),
+              DataColumn(label: Text(context.l10n.batchColQed), numeric: true),
+              DataColumn(label: Text(context.l10n.batchColLogs), numeric: true),
+              DataColumn(label: Text(context.l10n.batchColBbb), numeric: true),
+              DataColumn(label: Text(context.l10n.batchColDrugLike)),
+              DataColumn(label: Text(context.l10n.batchColAlerts)),
             ],
             rows: sorted.map((r) {
               final d = r.descriptors ?? {};

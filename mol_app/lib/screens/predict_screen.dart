@@ -4,6 +4,7 @@ import '../services/api_service.dart';
 import '../widgets/molecule_image.dart';
 import '../widgets/admet_radar.dart';
 import '../widgets/property_cards.dart';
+import '../l10n/l10n.dart';
 
 class PredictScreen extends StatefulWidget {
   final String? initialSmiles;
@@ -84,11 +85,11 @@ class _PredictScreenState extends State<PredictScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Single Molecule Prediction',
+          Text(context.l10n.predictTitle,
               style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 4),
-          const Text('Enter a SMILES string to get the full ADMET profile.',
-              style: TextStyle(color: Colors.white54)),
+          Text(context.l10n.predictEnterPrompt,
+              style: const TextStyle(color: Colors.white54)),
           const SizedBox(height: 20),
           _buildInputRow(),
           const SizedBox(height: 24),
@@ -123,7 +124,7 @@ class _PredictScreenState extends State<PredictScreen> {
             controller: _ctrl,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
             decoration: InputDecoration(
-              hintText: 'SMILES string (e.g. CC(=O)Oc1ccccc1C(=O)O)',
+              hintText: context.l10n.predictHint,
               prefixIcon: const Icon(Icons.science_outlined),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               suffixIcon: _ctrl.text.isNotEmpty
@@ -146,7 +147,7 @@ class _PredictScreenState extends State<PredictScreen> {
         const SizedBox(width: 12),
         FilledButton.icon(
           icon: const Icon(Icons.play_arrow),
-          label: const Text('Predict'),
+          label: Text(context.l10n.predictButton),
           onPressed: _loading ? null : _predict,
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

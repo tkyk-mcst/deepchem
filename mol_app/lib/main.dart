@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'l10n/l10n.dart';
 import 'screens/home_screen.dart';
 import 'screens/predict_screen.dart';
 import 'screens/batch_screen.dart';
@@ -17,8 +18,10 @@ class MolApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DeepChem — Molecular Properties',
+      title: 'DeepChem',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -110,13 +113,13 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
   String? _pendingSmiles;
 
-  static const _navItems = [
-    (Icons.home_outlined,          Icons.home,          'Home'),
-    (Icons.science_outlined,       Icons.science,       'Predict'),
-    (Icons.table_chart_outlined,   Icons.table_chart,   'Batch'),
-    (Icons.compare_outlined,       Icons.compare,       'Compare'),
-    (Icons.search,                 Icons.search,        'Search'),
-    (Icons.auto_awesome_outlined,  Icons.auto_awesome,  'GA Opt'),
+  static const _navIcons = [
+    (Icons.home_outlined,          Icons.home),
+    (Icons.science_outlined,       Icons.science),
+    (Icons.table_chart_outlined,   Icons.table_chart),
+    (Icons.compare_outlined,       Icons.compare),
+    (Icons.search,                 Icons.search),
+    (Icons.auto_awesome_outlined,  Icons.auto_awesome),
   ];
 
   void _navigateToPredict(String smiles) {
@@ -159,12 +162,20 @@ class _AppShellState extends State<AppShell> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: List.generate(_navItems.length, (i) {
-                        final item = _navItems[i];
+                      children: List.generate(_navIcons.length, (i) {
+                        final navLabels = [
+                          context.l10n.navHome,
+                          context.l10n.navPredict,
+                          context.l10n.navBatch,
+                          context.l10n.navCompare,
+                          context.l10n.navSearch,
+                          context.l10n.navGaOpt,
+                        ];
+                        final item = _navIcons[i];
                         final selected = _selectedIndex == i;
                         return _TopNavItem(
                           icon: selected ? item.$2 : item.$1,
-                          label: item.$3,
+                          label: navLabels[i],
                           selected: selected,
                           accentColor: Colors.tealAccent,
                           onTap: () {

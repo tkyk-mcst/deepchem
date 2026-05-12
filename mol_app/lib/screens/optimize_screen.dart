@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/api_service.dart';
 import '../widgets/molecule_image.dart';
+import '../l10n/l10n.dart';
 
 // ── Job data model ─────────────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ class _OptimizeScreenState extends State<OptimizeScreen>
     final running = _submitting || (_currentJob?.isActive == true);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SELFIES Genetic Algorithm', style: TextStyle(fontSize: 16)),
+        title: Text(context.l10n.optimizeTitle, style: const TextStyle(fontSize: 16)),
       ),
       body: Row(
         children: [
@@ -190,7 +191,7 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Label('Seed molecules (SMILES, one per line)'),
+                    _Label(context.l10n.optimizeSeedLabel),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _seedCtrl,
@@ -208,8 +209,8 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                               width: 14, height: 14,
                               child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.info_outline, size: 16),
-                      label: const Text('Show seed properties',
-                          style: TextStyle(fontSize: 13)),
+                      label: Text(context.l10n.optimizeShowSeedProps,
+                          style: const TextStyle(fontSize: 13)),
                       style: TextButton.styleFrom(
                           foregroundColor: Colors.tealAccent,
                           padding: EdgeInsets.zero),
@@ -282,7 +283,7 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                       Expanded(child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _Label('Pop. size'),
+                          _Label(context.l10n.optimizePopSize),
                           const SizedBox(height: 4),
                           _NumberField(
                               value: _popSize, min: 10, max: 200,
@@ -293,7 +294,7 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                       Expanded(child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _Label('Generations'),
+                          _Label(context.l10n.optimizeGenerations),
                           const SizedBox(height: 4),
                           _NumberField(
                               value: _nGen, min: 5, max: 100,
@@ -303,13 +304,13 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                     ]),
                     const SizedBox(height: 16),
                     Row(children: [
-                      _Label('Objectives'),
+                      _Label(context.l10n.optimizeObjectives),
                       const Spacer(),
                       TextButton.icon(
                         onPressed: () => setState(() => _objectives.add(
                             _ObjRow(property: 'logP', mode: 'maximize', weight: 1.0))),
                         icon: const Icon(Icons.add, size: 16),
-                        label: const Text('Add', style: TextStyle(fontSize: 13)),
+                        label: Text(context.l10n.optimizeAdd, style: const TextStyle(fontSize: 13)),
                         style: TextButton.styleFrom(foregroundColor: Colors.tealAccent),
                       ),
                     ]),
@@ -333,10 +334,10 @@ class _OptimizeScreenState extends State<OptimizeScreen>
                             : const Icon(Icons.play_arrow),
                         label: Text(
                           _submitting
-                              ? 'Submitting…'
+                              ? context.l10n.optimizeSubmitting
                               : running
-                                  ? 'Running…'
-                                  : 'Start Optimization',
+                                  ? context.l10n.optimizeRunning
+                                  : context.l10n.optimizeStart,
                           style: const TextStyle(fontSize: 15),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -425,13 +426,13 @@ class _StatusBadge extends StatelessWidget {
               size: 16, color: job.statusColor),
         const SizedBox(width: 10),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_label(job.status),
+          Text(_label(context, job.status),
               style: TextStyle(
                   color: job.statusColor,
                   fontSize: 13,
                   fontWeight: FontWeight.w600)),
           if (job.isDone)
-            Text('${job.result?['n_results'] ?? 0} candidates found',
+            Text(context.l10n.optimizeFoundCandidates(job.result?['n_results'] as int? ?? 0),
                 style: const TextStyle(color: Colors.white54, fontSize: 11)),
           if (job.isError && job.error != null)
             Text(job.error!,
@@ -441,12 +442,12 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 
-  String _label(String s) {
+  String _label(BuildContext context, String s) {
     switch (s) {
-      case 'pending': return 'Pending…';
-      case 'running': return 'Running…';
-      case 'done':    return 'Done';
-      case 'error':   return 'Error';
+      case 'pending': return context.l10n.optimizePending;
+      case 'running': return context.l10n.optimizeRunning;
+      case 'done':    return context.l10n.optimizeDone;
+      case 'error':   return context.l10n.optimizeError;
       default:        return s;
     }
   }
@@ -457,15 +458,15 @@ class _StatusBadge extends StatelessWidget {
 class _EmptyPlaceholder extends StatelessWidget {
   const _EmptyPlaceholder();
   @override
-  Widget build(BuildContext context) => const Center(
+  Widget build(BuildContext context) => Center(
     child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Icon(Icons.auto_awesome_outlined, size: 64, color: Colors.white24),
-      SizedBox(height: 14),
-      Text('Set parameters and start optimization',
-          style: TextStyle(color: Colors.white60, fontSize: 16)),
-      SizedBox(height: 6),
-      Text('SELFIES strings evolved via genetic algorithm',
-          style: TextStyle(color: Colors.white38, fontSize: 13)),
+      const Icon(Icons.auto_awesome_outlined, size: 64, color: Colors.white24),
+      const SizedBox(height: 14),
+      Text(context.l10n.optimizeSetParams,
+          style: const TextStyle(color: Colors.white60, fontSize: 16)),
+      const SizedBox(height: 6),
+      Text(context.l10n.optimizeSelfiesDesc,
+          style: const TextStyle(color: Colors.white38, fontSize: 13)),
     ]),
   );
 }
@@ -486,10 +487,10 @@ class _JobResults extends StatelessWidget {
               child: CircularProgressIndicator(
                   strokeWidth: 3, color: Colors.tealAccent)),
           const SizedBox(height: 18),
-          const Text('Evolving molecules…',
-              style: TextStyle(color: Colors.white70, fontSize: 16)),
+          Text(context.l10n.optimizeEvolving,
+              style: const TextStyle(color: Colors.white70, fontSize: 16)),
           const SizedBox(height: 6),
-          Text('Job: ${job.id}',
+          Text(context.l10n.optimizeJobLabel(job.id),
               style: const TextStyle(
                   color: Colors.white38, fontSize: 12, fontFamily: 'monospace')),
         ]),
@@ -534,7 +535,7 @@ class _JobResults extends StatelessWidget {
                 style: TextStyle(color: Colors.tealAccent, fontSize: 13)),
           ),
           const SizedBox(width: 12),
-          Text('${results.length} candidates',
+          Text(context.l10n.optimizeCandidates(results.length),
               style: const TextStyle(color: Colors.white70, fontSize: 14)),
         ]),
       ),
@@ -624,8 +625,8 @@ class _ResultCardState extends State<_ResultCard> {
                 if (score != null) ...[
                   const SizedBox(width: 10),
                   Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                    const Text('score',
-                        style: TextStyle(color: Colors.white38, fontSize: 10)),
+                    Text(context.l10n.commonScore,
+                        style: const TextStyle(color: Colors.white38, fontSize: 10)),
                     Text(
                       score is num ? score.toStringAsFixed(3) : '$score',
                       style: const TextStyle(
@@ -640,7 +641,7 @@ class _ResultCardState extends State<_ResultCard> {
                   icon: const Icon(Icons.copy, size: 16),
                   color: Colors.white54,
                   onPressed: () => Clipboard.setData(ClipboardData(text: selfies)),
-                  tooltip: 'Copy SELFIES',
+                  tooltip: context.l10n.optimizeCopySelfies,
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                 ),
@@ -915,7 +916,7 @@ class _ObjRowWidgetState extends State<_ObjRowWidget> {
         Row(children: [
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Weight: ${widget.row.weight.toStringAsFixed(1)}',
+              Text(context.l10n.commonWeightLabel(widget.row.weight.toStringAsFixed(1)),
                   style: const TextStyle(color: Colors.white54, fontSize: 12)),
               Slider(
                 value: widget.row.weight,
