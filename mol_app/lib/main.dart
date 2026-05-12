@@ -109,6 +109,14 @@ class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
   String? _pendingSmiles;
 
+  static const _navItems = [
+    (Icons.home_outlined,          Icons.home,          'Home'),
+    (Icons.science_outlined,       Icons.science,       'Predict'),
+    (Icons.table_chart_outlined,   Icons.table_chart,   'Batch'),
+    (Icons.compare_outlined,       Icons.compare,       'Compare'),
+    (Icons.search,                 Icons.search,        'Search'),
+  ];
+
   void _navigateToPredict(String smiles) {
     setState(() {
       _selectedIndex = 1;
@@ -126,78 +134,104 @@ class _AppShellState extends State<AppShell> {
       SearchScreen(onPredict: _navigateToPredict),
     ];
 
-    final navItems = [
-      (Icons.home_outlined, Icons.home, 'Home'),
-      (Icons.science_outlined, Icons.science, 'Predict'),
-      (Icons.table_chart_outlined, Icons.table_chart, 'Batch'),
-      (Icons.compare_outlined, Icons.compare, 'Compare'),
-      (Icons.search, Icons.search, 'Search'),
-    ];
-
-    final isWide = MediaQuery.of(context).size.width > 700;
-
     return Scaffold(
-      body: Row(
-        children: [
-          // Navigation Rail (desktop)
-          if (isWide)
-            NavigationRail(
-              backgroundColor: const Color(0xFF12122A),
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (i) {
-                setState(() {
-                  _selectedIndex = i;
-                  if (i != 1) _pendingSmiles = null;
-                });
-              },
-              labelType: NavigationRailLabelType.all,
-              minWidth: 80,
-              leading: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Icon(Icons.biotech, color: Colors.tealAccent, size: 28),
-              ),
-              selectedIconTheme:
-                  const IconThemeData(color: Colors.tealAccent),
-              selectedLabelTextStyle:
-                  const TextStyle(color: Colors.tealAccent, fontSize: 11),
-              unselectedLabelTextStyle:
-                  const TextStyle(color: Colors.white38, fontSize: 11),
-              destinations: navItems
-                  .map((n) => NavigationRailDestination(
-                        icon: Icon(n.$1),
-                        selectedIcon: Icon(n.$2),
-                        label: Text(n.$3),
-                      ))
-                  .toList(),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(52),
+        child: Container(
+          color: const Color(0xFF12122A),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                const SizedBox(width: 14),
+                const Icon(Icons.biotech, color: Colors.tealAccent, size: 24),
+                const SizedBox(width: 8),
+                const Text('MolPredict',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(_navItems.length, (i) {
+                        final item = _navItems[i];
+                        final selected = _selectedIndex == i;
+                        return _TopNavItem(
+                          icon: selected ? item.$2 : item.$1,
+                          label: item.$3,
+                          selected: selected,
+                          accentColor: Colors.tealAccent,
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = i;
+                              if (i != 1) _pendingSmiles = null;
+                            });
+                          },
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          if (isWide)
-            const VerticalDivider(thickness: 1, width: 1, color: Colors.white12),
-          // Main content
-          Expanded(
-            child: screens[_selectedIndex],
           ),
-        ],
+        ),
       ),
-      // Bottom nav (mobile)
-      bottomNavigationBar: isWide
-          ? null
-          : NavigationBar(
-              backgroundColor: const Color(0xFF12122A),
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (i) {
-                setState(() {
-                  _selectedIndex = i;
-                  if (i != 1) _pendingSmiles = null;
-                });
-              },
-              destinations: navItems
-                  .map((n) => NavigationDestination(
-                        icon: Icon(n.$1),
-                        selectedIcon: Icon(n.$2),
-                        label: n.$3,
-                      ))
-                  .toList(),
-            ),
+      body: screens[_selectedIndex],
+    );
+  }
+}
+
+class _TopNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _TopNavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+        decoration: selected
+            ? BoxDecoration(
+                color: accentColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: accentColor.withValues(alpha: 0.5)),
+              )
+            : null,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 16,
+                color: selected ? accentColor : Colors.white54),
+            const SizedBox(width: 5),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: selected ? accentColor : Colors.white54,
+                  fontWeight:
+                      selected ? FontWeight.w600 : FontWeight.normal,
+                )),
+          ],
+        ),
+      ),
     );
   }
 }
