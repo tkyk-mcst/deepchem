@@ -6,9 +6,8 @@ __pycache__/
 *.bak
 releases/
 
-# Flutter build artifacts (keep web build, exclude others)
+# Flutter build artifacts (run `flutter build web` locally)
 mol_app/build/
-!mol_app/build/web/
 mol_app/.dart_tool/
 mol_app/.flutter-plugins
 mol_app/.flutter-plugins-dependencies
