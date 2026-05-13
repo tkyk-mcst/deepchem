@@ -1,0 +1,318 @@
+{
+  "bbbp": {
+    "name": "bbbp",
+    "label": "BBBP",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "p_np": {
+        "dc": 0.8681,
+        "fm4m": 1.0,
+        "n": 100
+      }
+    },
+    "n_molecules": 100
+  },
+  "lipo": {
+    "name": "lipo",
+    "label": "Lipophilicity (LogD)",
+    "task_type": "regression",
+    "metric": "R²",
+    "tasks": {
+      "exp": {
+        "dc": 0.7989,
+        "fm4m": 0.6855,
+        "n": 100
+      }
+    },
+    "n_molecules": 100
+  },
+  "esol": {
+    "name": "esol",
+    "label": "ESOL (LogS)",
+    "task_type": "regression",
+    "metric": "R²",
+    "tasks": {
+      "measured log solubility in mols per litre": {
+        "dc": 0.7049,
+        "fm4m": 0.8596,
+        "n": 100
+      }
+    },
+    "n_molecules": 100
+  },
+  "freesolv": {
+    "name": "freesolv",
+    "label": "FreeSolv (ΔG)",
+    "task_type": "regression",
+    "metric": "R²",
+    "tasks": {
+      "expt": {
+        "dc": 0.7755,
+        "fm4m": 0.791,
+        "n": 200
+      }
+    },
+    "n_molecules": 200
+  },
+  "bace": {
+    "name": "bace",
+    "label": "BACE",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "Class": {
+        "dc": 0.9422,
+        "fm4m": 0.9784,
+        "n": 100
+      }
+    },
+    "n_molecules": 100
+  },
+  "tox21": {
+    "name": "tox21",
+    "label": "Tox21",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "NR-AR": {
+        "dc": 1.0,
+        "fm4m": 0.9926,
+        "n": 93
+      },
+      "NR-AR-LBD": {
+        "dc": 1.0,
+        "fm4m": 1.0,
+        "n": 86
+      },
+      "NR-AhR": {
+        "dc": 0.9979,
+        "fm4m": 0.9076,
+        "n": 85
+      },
+      "NR-Aromatase": {
+        "dc": 0.7113,
+        "fm4m": 0.9906,
+        "n": 77
+      },
+      "NR-ER": {
+        "dc": 0.9973,
+        "fm4m": 0.9581,
+        "n": 84
+      },
+      "NR-ER-LBD": {
+        "dc": 1.0,
+        "fm4m": 0.9738,
+        "n": 90
+      },
+      "NR-PPAR-gamma": {
+        "dc": 0.4444,
+        "fm4m": 1.0,
+        "n": 82
+      },
+      "SR-ARE": {
+        "dc": 0.8548,
+        "fm4m": 0.8076,
+        "n": 76
+      },
+      "SR-ATAD5": {
+        "dc": 0.899,
+        "fm4m": 0.9686,
+        "n": 91
+      },
+      "SR-HSE": {
+        "dc": 0.915,
+        "fm4m": 0.9819,
+        "n": 86
+      },
+      "SR-MMP": {
+        "dc": 0.9255,
+        "fm4m": 0.9964,
+        "n": 77
+      },
+      "SR-p53": {
+        "dc": 0.5754,
+        "fm4m": 1.0,
+        "n": 87
+      }
+    },
+    "n_molecules": 100
+  },
+  "clintox": {
+    "name": "clintox",
+    "label": "ClinTox",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "FDA_APPROVED": {
+        "dc": 0.9911,
+        "fm4m": 1.0,
+        "n": 100
+      },
+      "CT_TOX": {
+        "dc": 0.9132,
+        "fm4m": 1.0,
+        "n": 100
+      }
+    },
+    "n_molecules": 100
+  },
+  "sider": {
+    "name": "sider",
+    "label": "SIDER",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "Hepatobiliary disorders": {
+        "dc": 0.9576,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Metabolism and nutrition disorders": {
+        "dc": 0.9481,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Product issues": {
+        "dc": 0.7323,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Eye disorders": {
+        "dc": 0.9456,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Investigations": {
+        "dc": 0.9904,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Musculoskeletal and connective tissue disorders": {
+        "dc": 0.9606,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Gastrointestinal disorders": {
+        "dc": 0.936,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Social circumstances": {
+        "dc": 0.965,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Immune system disorders": {
+        "dc": 0.9349,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Reproductive system and breast disorders": {
+        "dc": 0.9593,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Neoplasms benign, malignant and unspecified (incl cysts and polyps)": {
+        "dc": 0.9663,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "General disorders and administration site conditions": {
+        "dc": 0.8891,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Endocrine disorders": {
+        "dc": 0.9893,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Surgical and medical procedures": {
+        "dc": 0.9907,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Vascular disorders": {
+        "dc": 0.9472,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Blood and lymphatic system disorders": {
+        "dc": 0.9794,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Skin and subcutaneous tissue disorders": {
+        "dc": 0.9516,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Congenital, familial and genetic disorders": {
+        "dc": 0.9616,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Infections and infestations": {
+        "dc": 0.961,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Respiratory, thoracic and mediastinal disorders": {
+        "dc": 0.9851,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Psychiatric disorders": {
+        "dc": 0.9634,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Renal and urinary disorders": {
+        "dc": 0.9731,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Pregnancy, puerperium and perinatal conditions": {
+        "dc": 0.9999,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Ear and labyrinth disorders": {
+        "dc": 0.9648,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Cardiac disorders": {
+        "dc": 0.9566,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Nervous system disorders": {
+        "dc": 0.9225,
+        "fm4m": "N/A",
+        "n": 200
+      },
+      "Injury, poisoning and procedural complications": {
+        "dc": 0.947,
+        "fm4m": "N/A",
+        "n": 200
+      }
+    },
+    "n_molecules": 200
+  },
+  "hiv": {
+    "name": "hiv",
+    "label": "HIV",
+    "task_type": "classification",
+    "metric": "AUC-ROC",
+    "tasks": {
+      "HIV_active": {
+        "dc": 0.9304,
+        "fm4m": 0.9347,
+        "n": 500
+      }
+    },
+    "n_molecules": 500
+  }
+}

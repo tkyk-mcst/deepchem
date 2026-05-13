@@ -1,0 +1,420 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
+<title>Benchmark: DeepChemUI vs FM4MUI</title>
+<style>
+body{background:#0f1117;color:#e0e0e0;font-family:'Segoe UI',sans-serif;margin:0;padding:24px}
+h1{color:#93c5fd;margin-bottom:4px}
+.sub{color:#6b7280;margin-bottom:24px;font-size:13px}
+table{border-collapse:collapse;width:100%;max-width:960px}
+th{background:#1e2130;color:#93c5fd;padding:10px 14px;text-align:left;border-bottom:2px solid #374151}
+td{padding:7px 14px;border-bottom:1px solid #1a1f2e}
+tr:hover td{background:#1a1f2e}
+.legend{margin-top:16px;font-size:12px;color:#6b7280}
+</style></head><body>
+<h1>🧪 Molecular Property Prediction Benchmark</h1>
+<p class="sub">DeepChemUI (ECFP4 + MultitaskNet) vs FM4MUI (MolFormer-XL embeddings) &nbsp;|&nbsp; MoleculeNet 9 datasets</p>
+<table>
+<thead><tr>
+  <th>Dataset / Task</th><th>Metric</th><th>N</th>
+  <th>DeepChemUI</th><th>FM4MUI</th>
+</tr></thead>
+<tbody>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">BBBP <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>100</td>
+          <td style="color:#4ade80;font-weight:700;">0.8681</td>
+          <td style="color:#4ade80;font-weight:700;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">p_np</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#4ade80;">0.8681</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">Lipophilicity (LogD) <span style="background:#1d4ed8;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">DC</span></td>
+          <td style="color:#6b7280">R²</td>
+          <td>100</td>
+          <td style="color:#4ade80;font-weight:700;">0.7989</td>
+          <td style="color:#fbbf24;font-weight:700;">0.6855</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">exp</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#4ade80;">0.7989</td>
+          <td style="color:#fbbf24;">0.6855</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">ESOL (LogS) <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">R²</td>
+          <td>100</td>
+          <td style="color:#fbbf24;font-weight:700;">0.7049</td>
+          <td style="color:#4ade80;font-weight:700;">0.8596</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">measured log solubility in mols per litre</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#fbbf24;">0.7049</td>
+          <td style="color:#4ade80;">0.8596</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">FreeSolv (ΔG) <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">R²</td>
+          <td>200</td>
+          <td style="color:#4ade80;font-weight:700;">0.7755</td>
+          <td style="color:#4ade80;font-weight:700;">0.7910</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">expt</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.7755</td>
+          <td style="color:#4ade80;">0.7910</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">BACE <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>100</td>
+          <td style="color:#4ade80;font-weight:700;">0.9422</td>
+          <td style="color:#4ade80;font-weight:700;">0.9784</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Class</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#4ade80;">0.9422</td>
+          <td style="color:#4ade80;">0.9784</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">Tox21 <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>100</td>
+          <td style="color:#4ade80;font-weight:700;">0.8600</td>
+          <td style="color:#4ade80;font-weight:700;">0.9648</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-AR-LBD</td>
+          <td></td>
+          <td style="color:#6b7280">86</td>
+          <td style="color:#4ade80;">1.0000</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-ER-LBD</td>
+          <td></td>
+          <td style="color:#6b7280">90</td>
+          <td style="color:#4ade80;">1.0000</td>
+          <td style="color:#4ade80;">0.9738</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">SR-ATAD5</td>
+          <td></td>
+          <td style="color:#6b7280">91</td>
+          <td style="color:#4ade80;">0.8990</td>
+          <td style="color:#4ade80;">0.9686</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-AR</td>
+          <td></td>
+          <td style="color:#6b7280">93</td>
+          <td style="color:#4ade80;">1.0000</td>
+          <td style="color:#4ade80;">0.9926</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-ER</td>
+          <td></td>
+          <td style="color:#6b7280">84</td>
+          <td style="color:#4ade80;">0.9973</td>
+          <td style="color:#4ade80;">0.9581</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">SR-MMP</td>
+          <td></td>
+          <td style="color:#6b7280">77</td>
+          <td style="color:#4ade80;">0.9255</td>
+          <td style="color:#4ade80;">0.9964</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">SR-HSE</td>
+          <td></td>
+          <td style="color:#6b7280">86</td>
+          <td style="color:#4ade80;">0.9150</td>
+          <td style="color:#4ade80;">0.9819</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">SR-ARE</td>
+          <td></td>
+          <td style="color:#6b7280">76</td>
+          <td style="color:#4ade80;">0.8548</td>
+          <td style="color:#4ade80;">0.8076</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-AhR</td>
+          <td></td>
+          <td style="color:#6b7280">85</td>
+          <td style="color:#4ade80;">0.9979</td>
+          <td style="color:#4ade80;">0.9076</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-Aromatase</td>
+          <td></td>
+          <td style="color:#6b7280">77</td>
+          <td style="color:#fbbf24;">0.7113</td>
+          <td style="color:#4ade80;">0.9906</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">NR-PPAR-gamma</td>
+          <td></td>
+          <td style="color:#6b7280">82</td>
+          <td style="color:#f87171;">0.4444</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">SR-p53</td>
+          <td></td>
+          <td style="color:#6b7280">87</td>
+          <td style="color:#fbbf24;">0.5754</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">ClinTox <span style="background:#7c3aed;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">FM4M</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>100</td>
+          <td style="color:#4ade80;font-weight:700;">0.9522</td>
+          <td style="color:#4ade80;font-weight:700;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">FDA_APPROVED</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#4ade80;">0.9911</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">CT_TOX</td>
+          <td></td>
+          <td style="color:#6b7280">100</td>
+          <td style="color:#4ade80;">0.9132</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">SIDER <span style="background:#1d4ed8;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">DC</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>200</td>
+          <td style="color:#4ade80;font-weight:700;">0.9511</td>
+          <td style="color:#4ade80;font-weight:700;">0.8941</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Metabolism and nutrition disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9481</td>
+          <td style="color:#4ade80;">0.9433</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Blood and lymphatic system disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9794</td>
+          <td style="color:#4ade80;">0.9329</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Congenital, familial and genetic disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9616</td>
+          <td style="color:#4ade80;">0.9236</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Ear and labyrinth disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9648</td>
+          <td style="color:#4ade80;">0.8801</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Hepatobiliary disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9576</td>
+          <td style="color:#4ade80;">0.8450</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Vascular disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9472</td>
+          <td style="color:#4ade80;">0.8969</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Pregnancy, puerperium and perinatal conditions</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9999</td>
+          <td style="color:#4ade80;">0.8811</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Psychiatric disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9634</td>
+          <td style="color:#4ade80;">0.8651</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Eye disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9456</td>
+          <td style="color:#4ade80;">0.9069</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Respiratory, thoracic and mediastinal disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9851</td>
+          <td style="color:#4ade80;">0.8716</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Musculoskeletal and connective tissue disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9606</td>
+          <td style="color:#4ade80;">0.8527</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Reproductive system and breast disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9593</td>
+          <td style="color:#4ade80;">0.8822</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Surgical and medical procedures</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9907</td>
+          <td style="color:#4ade80;">0.7812</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Social circumstances</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9650</td>
+          <td style="color:#4ade80;">0.9440</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Investigations</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9904</td>
+          <td style="color:#4ade80;">0.8915</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Injury, poisoning and procedural complications</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9470</td>
+          <td style="color:#4ade80;">0.8226</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Neoplasms benign, malignant and unspecified (incl cysts and polyps)</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9663</td>
+          <td style="color:#4ade80;">0.8579</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Skin and subcutaneous tissue disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9516</td>
+          <td style="color:#4ade80;">0.8711</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Immune system disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9349</td>
+          <td style="color:#4ade80;">0.9314</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Nervous system disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9225</td>
+          <td style="color:#4ade80;">0.9673</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Infections and infestations</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9610</td>
+          <td style="color:#4ade80;">0.9237</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Gastrointestinal disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9360</td>
+          <td style="color:#4ade80;">0.9682</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Renal and urinary disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9731</td>
+          <td style="color:#4ade80;">0.8115</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">General disorders and administration site conditions</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.8891</td>
+          <td style="color:#4ade80;">0.9014</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Endocrine disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9893</td>
+          <td style="color:#4ade80;">0.9030</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Product issues</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#fbbf24;">0.7323</td>
+          <td style="color:#4ade80;">1.0000</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">Cardiac disorders</td>
+          <td></td>
+          <td style="color:#6b7280">200</td>
+          <td style="color:#4ade80;">0.9566</td>
+          <td style="color:#4ade80;">0.8843</td>
+        </tr>
+        <tr style="background:#1e2130">
+          <td style="font-weight:700;color:#93c5fd">HIV <span style="background:#374151;color:#9ca3af;border-radius:4px;padding:1px 6px;font-size:11px">—</span></td>
+          <td style="color:#6b7280">AUC-ROC</td>
+          <td>500</td>
+          <td style="color:#4ade80;font-weight:700;">0.9304</td>
+          <td style="color:#4ade80;font-weight:700;">0.9347</td>
+        </tr>
+        <tr>
+          <td style="padding-left:20px;color:#6b7280;font-size:13px">HIV_active</td>
+          <td></td>
+          <td style="color:#6b7280">500</td>
+          <td style="color:#4ade80;">0.9304</td>
+          <td style="color:#4ade80;">0.9347</td>
+        </tr></tbody>
+</table>
+<div class="legend">
+  <span style="color:#4ade80">&#9632; &ge;0.75</span>&nbsp;
+  <span style="color:#fbbf24">&#9632; &ge;0.50</span>&nbsp;
+  <span style="color:#f87171">&#9632; &lt;0.50</span>&nbsp;&nbsp;
+  Badge: winner per dataset (diff &gt; 0.005)
+</div>
+</body></html>
