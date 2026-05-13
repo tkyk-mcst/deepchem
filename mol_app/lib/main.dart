@@ -12,14 +12,24 @@ void main() {
   runApp(const MolApp());
 }
 
-class MolApp extends StatelessWidget {
+class MolApp extends StatefulWidget {
   const MolApp({super.key});
+
+  @override
+  State<MolApp> createState() => _MolAppState();
+}
+
+class _MolAppState extends State<MolApp> {
+  Locale? _locale;
+
+  void _setLocale(Locale locale) => setState(() => _locale = locale);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'DeepChem',
       debugShowCheckedModeBanner: false,
+      locale: _locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
@@ -97,13 +107,14 @@ class MolApp extends StatelessWidget {
           dividerThickness: 0.3,
         ),
       ),
-      home: const AppShell(),
+      home: AppShell(onLocaleChange: _setLocale),
     );
   }
 }
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  final void Function(Locale) onLocaleChange;
+  const AppShell({super.key, required this.onLocaleChange});
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -189,12 +200,34 @@ class _AppShellState extends State<AppShell> {
                     ),
                   ),
                 ),
+                _LangButton(onLocaleChange: widget.onLocaleChange),
+                const SizedBox(width: 8),
               ],
             ),
           ),
         ),
       ),
       body: screens[_selectedIndex],
+    );
+  }
+}
+
+class _LangButton extends StatelessWidget {
+  final void Function(Locale) onLocaleChange;
+  const _LangButton({required this.onLocaleChange});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.language, color: Colors.white54, size: 18),
+      tooltip: 'Language',
+      color: const Color(0xFF1E1E32),
+      onSelected: (code) => onLocaleChange(Locale(code)),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'en', child: Text('🇺🇸  English')),
+        PopupMenuItem(value: 'ja', child: Text('🇯🇵  日本語')),
+        PopupMenuItem(value: 'zh', child: Text('🇨🇳  中文')),
+      ],
     );
   }
 }
