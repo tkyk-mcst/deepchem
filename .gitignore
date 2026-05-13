@@ -19,8 +19,7 @@ deepchem-api/saved_models/
 deepchem-api/__pycache__/
 deepchem-api/*.egg-info/
 
-# Dataset & generated outputs (not source code)
-"MS_prediction dataset"/
+# Generated outputs (not source code)
 old/
 *.pdf
 *.html
