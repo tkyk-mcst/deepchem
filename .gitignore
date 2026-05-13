@@ -13,8 +13,8 @@ mol_app/.dart_tool/
 mol_app/.flutter-plugins
 mol_app/.flutter-plugins-dependencies
 
-# DeepChem intermediate checkpoints (keep only checkpoint5.pt via LFS)
-deepchem-api/saved_models/**/checkpoint[1-4].pt
+# Trained model files (too large — run train_models.py locally)
+deepchem-api/saved_models/
 
 # Large data/cache
 deepchem-api/__pycache__/
