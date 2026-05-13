@@ -22,7 +22,8 @@ from pathlib import Path
 
 DEEPCHEM_API = "http://localhost:8282"
 FM4M_API     = "http://localhost:8090"
-DATA_BASE    = Path(r"C:\Users\takay\python379\DeepChem\MS_prediction dataset")
+_BASE        = Path(__file__).parent
+DATA_BASE    = _BASE / "MS_prediction dataset"
 SAMPLE_N     = 100   # molecules per dataset for benchmark (speed)
 
 DATASETS = {
@@ -364,14 +365,14 @@ td {{padding:7px 14px;border-bottom:1px solid #1a1d2e}}
 </body>
 </html>"""
 
-    path = Path(r"C:\Users\takay\python379\DeepChem") / filename
+    path = _BASE / filename
     path.write_text(html, encoding="utf-8")
     print(f"\nSaved: {path}")
     return str(path)
 
 
 # ── Entry point ────────────────────────────────────────────────────────────
-CACHE_FILE = Path(r"C:\Users\takay\python379\DeepChem") / "benchmark_cache.json"
+CACHE_FILE = _BASE / "benchmark_cache.json"
 
 
 def load_cache() -> dict:

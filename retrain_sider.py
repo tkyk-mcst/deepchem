@@ -8,11 +8,12 @@ SIDER 再学習スクリプト。
 学習後: saved_models/sider/ を上書きして API に反映。
 """
 import os, sys, pickle, logging
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-MODEL_DIR = r"C:\Users\takay\python379\DeepChem\deepchem-api\saved_models"
+MODEL_DIR = str(Path(__file__).parent / "deepchem-api" / "saved_models")
 FP_SIZE   = 2048
 FP_RADIUS = 4
 

@@ -4,14 +4,16 @@ DeepChem 内部の calc 値ではなく、実測値で学習する。
 学習と検証は分離して報告する。
 """
 import os, sys, pickle, logging
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-MODEL_DIR  = r"C:\Users\takay\python379\DeepChem\deepchem-api\saved_models\freesolv"
-DATA_BASE  = r"C:\Users\takay\python379\DeepChem\MS_prediction dataset\FreeSolv"
+_BASE      = Path(__file__).parent
+MODEL_DIR  = str(_BASE / "deepchem-api" / "saved_models" / "freesolv")
+DATA_BASE  = str(_BASE / "MS_prediction dataset" / "FreeSolv")
 FP_SIZE    = 2048
 FP_RADIUS  = 4
 

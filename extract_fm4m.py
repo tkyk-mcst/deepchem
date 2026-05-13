@@ -6,8 +6,9 @@ import re, json
 import numpy as np
 from pathlib import Path
 
-OLD_HTML   = Path(r"C:\Users\takay\python379\DeepChem\Benchmark_ DeepChemUI vs FM4MUI — All Datasets_20260513_0115.html")
-CACHE_FILE = Path(r"C:\Users\takay\python379\DeepChem\benchmark_cache.json")
+_BASE      = Path(__file__).parent
+OLD_HTML   = _BASE / "Benchmark_ DeepChemUI vs FM4MUI — All Datasets_20260513_0115.html"
+CACHE_FILE = _BASE / "benchmark_cache.json"
 
 # Dataset label → cache key
 LABEL_TO_KEY = {

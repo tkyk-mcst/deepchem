@@ -9,8 +9,9 @@ import pandas as pd
 from pathlib import Path
 
 FM4M_API  = "http://localhost:8090"
-DATA_BASE = Path(r"C:\Users\takay\python379\DeepChem\MS_prediction dataset")
-CACHE_FILE = Path(r"C:\Users\takay\python379\DeepChem\benchmark_cache.json")
+_BASE      = Path(__file__).parent
+DATA_BASE  = _BASE / "MS_prediction dataset"
+CACHE_FILE = _BASE / "benchmark_cache.json"
 SAMPLE_N  = 100
 
 DATASETS = {

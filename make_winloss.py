@@ -5,8 +5,9 @@ import json, subprocess
 import numpy as np
 from pathlib import Path
 
-CACHE   = Path(r"C:\Users\takay\python379\DeepChem\benchmark_cache.json")
-OUT_DIR = Path(r"C:\Users\takay\python379\DeepChem")
+_BASE   = Path(__file__).parent
+CACHE   = _BASE / "benchmark_cache.json"
+OUT_DIR = _BASE
 
 ORDER = ["bbbp","lipo","esol","freesolv","bace","tox21","clintox","sider","hiv"]
 
