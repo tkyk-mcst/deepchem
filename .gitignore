@@ -19,6 +19,12 @@ deepchem-api/saved_models/
 deepchem-api/__pycache__/
 deepchem-api/*.egg-info/
 
+# Dataset & generated outputs (not source code)
+"MS_prediction dataset"/
+old/
+*.pdf
+*.html
+
 # Playwright test results
 playwright_tests/full/
 playwright_tests/*.png
